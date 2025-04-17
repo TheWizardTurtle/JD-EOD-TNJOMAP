@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jedi Temple Interactive Map</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    html, body {
+      margin: 0;
+      height: 100%;
+      font-family: sans-serif;
+    }
+    #map {
+      height: 100%;
+      width: 100%;
+    }
+    .leaflet-popup-content-wrapper {
+      background: #111;
+      color: #fff;
+      border: 1px solid #444;
+    }
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.5); opacity: 0.5; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    #searchBox {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 1000;
+    }
+    #searchInput {
+      padding: 6px;
+      font-size: 14px;
+      width: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div id="searchBox">
+    <input type="text" id="searchInput" placeholder="Search POI..." />
+  </div>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const map = L.map('map', {
+      crs: L.CRS.Simple,
+      minZoom: -2,
+      maxZoom: 2,
+      zoomControl: true
+    });
+
+    const mapWidth = 4096;
+    const mapHeight = 3911;
+    const bounds = [[0, 0], [mapHeight, mapWidth]];
+
+    const image = L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+    map.fitBounds(bounds);
+
+    const pois = [
+      { name: 'Sentinel Quarters', x: 925, y: 475 },
+      { name: 'Trial Room', x: 445, y: 730 },
+      { name: 'Jails', x: 590, y: 1440 },
+      { name: 'Questioning Room', x: 1045, y: 1050 },
+      { name: 'JAF Dojo', x: 1225, y: 500 },
+      { name: 'Cantina', x: 1425, y: 510 },
+      { name: 'Main TG Dojo', x: 1870, y: 560 },
+      { name: 'Archives', x: 2315, y: 645 },
+      { name: 'Combat Hall', x: 1375, y: 1330 },
+      { name: 'Lecture Hall', x: 1880, y: 1110 },
+      { name: 'Spawn', x: 1240, y: 2000 },
+      { name: 'Council Room', x: 1145, y: 2610 },
+      { name: 'Hangar Teleport', x: 2280, y: 2645 },
+      { name: 'TG Dojo #2', x: 2200, y: 1745 },
+      { name: 'Consoles', x: 2335, y: 1110 },
+      { name: 'Restricted', x: 2005, y: 505 },
+      { name: 'Guardian Quarters', x: 620, y: 2170 },
+      { name: 'Holocron Vault', x: 2605, y: 880 },
+      { name: 'Consular Quarters', x: 2580, y: 1240 },
+      { name: 'VIP Statues', x: 1345, y: 3280 }
+    ];
+
+    const markers = [];
+
+    pois.forEach(poi => {
+      const marker = L.circleMarker([poi.y, poi.x], {
+        radius: 6,
+        color: '#0ff',
+        fillColor: '#0ff',
+        fillOpacity: 0.7,
+        className: 'pulse'
+      }).addTo(map).bindPopup(`<strong>${poi.name}</strong>`);
+
+      marker.poiName = poi.name.toLowerCase();
+      markers.push(marker);
+    });
+
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+      const value = e.target.value.toLowerCase();
+      markers.forEach(marker => {
+        const match = marker.poiName.includes(value);
+        if (match) {
+          marker.addTo(map);
+        } else {
+          map.removeLayer(marker);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
