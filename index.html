@@ -130,8 +130,7 @@
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const music = document.getElementById('bg-music');
-      music.volume = 0.3;
+      document.getElementById('bg-music').volume = 0.3;
     });
 
     function addRippleEffect(markerElement) {
@@ -151,21 +150,68 @@
     const mapWidth = 8192;
     const mapHeight = 7830;
     const bounds = [[0, 0], [mapHeight, mapWidth]];
-    const mainLayer = L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+    L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
     map.setView([mapHeight / 2, mapWidth / 2], -3);
 
-    const miniMap = new L.Control.MiniMap(
-      L.imageOverlay('JK-EODMAP.png', bounds),
-      {
-        toggleDisplay: true,
-        minimized: false,
-        width: 200,
-        height: 200,
-        zoomLevelOffset: -4,
-        aimingRectOptions: {color: "#0ff", weight: 1, clickable: false},
-        shadowRectOptions: {color: "#0ff", weight: 1, clickable: false, opacity: 0, fillOpacity: 0}
-      }
-    ).addTo(map);
+    new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds), {
+      toggleDisplay: true,
+      minimized: false,
+      width: 200,
+      height: 200,
+      zoomLevelFixed: -4 // updated to use fixed zoom level for consistency
+    }).addTo(map);
+
+    const pois = [
+      { name: 'Combat Room 1', x: 5588, y: 1152, category: 'combat', color: '#1f8dd6' },
+      { name: 'Meditation Chamber 1', x: 6608, y: 2508, category: 'meditation', color: '#90ee90' },
+      { name: 'Lecture Room 1', x: 6606, y: 1710, category: 'lecture', color: '#006400' },
+      { name: 'Guardian Quarters', x: 1780, y: 1984, category: 'general', color: '#3498db' },
+      { name: 'Council Room', x: 3684, y: 1056, category: 'general', color: '#ffd700' }
+    ];
+
+    const containers = {
+      combat: document.getElementById('combatRooms'),
+      meditation: document.getElementById('meditationChambers'),
+      lecture: document.getElementById('lectureRooms'),
+      general: document.getElementById('poiList')
+    };
+
+    const markers = [];
+
+    pois.forEach(poi => {
+      const icon = L.divIcon({
+        className: 'custom-pin',
+        iconSize: [14, 14],
+        html: `<div style="background:${poi.color}; width:14px; height:14px; border-radius:50%; border:2px solid ${poi.color}; box-shadow:0 0 8px ${poi.color}"></div>`
+      });
+
+      const marker = L.marker([poi.y, poi.x], { icon }).bindPopup(`<strong>${poi.name}</strong>`);
+      marker.poiName = poi.name.toLowerCase();
+      marker.visible = false;
+      markers.push(marker);
+
+      const item = document.createElement('div');
+      item.className = 'poi-item';
+      item.textContent = poi.name;
+      item.addEventListener('click', () => {
+        if (!marker.visible) marker.addTo(map);
+        map.flyTo([poi.y, poi.x], -1);
+        marker.openPopup();
+      });
+      containers[poi.category].appendChild(item);
+    });
+
+    document.getElementById('searchInput').addEventListener('input', function (e) {
+      const value = e.target.value.toLowerCase();
+      markers.forEach(marker => {
+        const match = marker.poiName.includes(value);
+        if (value && match) {
+          marker.addTo(map);
+        } else {
+          map.removeLayer(marker);
+        }
+      });
+    });
 
     setInterval(() => {
       document.querySelectorAll('.leaflet-marker-icon').forEach(el => addRippleEffect(el));
