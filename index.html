@@ -77,15 +77,15 @@
 <body>
   <div id="sidebar">
     <h2>Points of Interest</h2>
-    <details open>
+    <details>
       <summary><strong>Combat Rooms</strong></summary>
       <div id="combatRooms"></div>
     </details>
-    <details open>
+    <details>
       <summary><strong>Meditation Chambers</strong></summary>
       <div id="meditationChambers"></div>
     </details>
-    <details open>
+    <details>
       <summary><strong>Lecture Rooms</strong></summary>
       <div id="lectureRooms"></div>
     </details>
@@ -96,7 +96,27 @@
   </div>
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+// Show all markers in category when details are opened
+function revealCategoryMarkers(prefix) {
+  markers.forEach(marker => {
+    if (marker.poiName.startsWith(prefix.toLowerCase()) && !marker.visible) {
+      marker.addTo(map);
+      marker.visible = true;
+    }
+  });
+}
+
+document.querySelector('details summary strong:contains("Combat Rooms")').parentElement.addEventListener('toggle', function (e) {
+  if (this.open) revealCategoryMarkers('Combat Room');
+});
+document.querySelector('details summary strong:contains("Meditation Chambers")').parentElement.addEventListener('toggle', function (e) {
+  if (this.open) revealCategoryMarkers('Meditation Chamber');
+});
+document.querySelector('details summary strong:contains("Lecture Rooms")').parentElement.addEventListener('toggle', function (e) {
+  if (this.open) revealCategoryMarkers('Lecture Room');
+});
+</script>
 
 <script>
 // Optional: Add a reset view button
