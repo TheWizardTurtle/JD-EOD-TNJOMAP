@@ -105,30 +105,33 @@
 
     L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
 map.fitBounds(bounds);
-setTimeout(() => map.invalidateSize(), 200);
+setTimeout(() => {
+  map.invalidateSize();
+  map.setZoom(-1);
+}, 200);
 
     const pois = [
-      { name: 'Sentinel Quarters', x: 1520, y: 3360 },
-      { name: 'Trial Room', x: 172, y: 3152 },
-      { name: 'Jails', x: 608, y: 2208 },
-      { name: 'Questioning Room', x: 1028, y: 2588 },
-      { name: 'JAF Dojo', x: 1396, y: 2760 },
-      { name: 'Cantina', x: 2252, y: 2908 },
-      { name: 'Main TG Dojo', x: 3080, y: 2676 },
-      { name: 'Archives', x: 3464, y: 2184 },
-      { name: 'Combat Hall', x: 2188, y: 2176 },
-      { name: 'Lecture Hall', x: 3000, y: 2180 },
-      { name: 'Spawn', x: 1840, y: 960 },
-      { name: 'Council Room', x: 1832, y: 540 },
-      { name: 'Hangar Teleport', x: 3564, y: 636 },
-      { name: 'TG Dojo #2', x: 3452, y: 1128 },
-      { name: 'Consoles', x: 2185, y: 1060 },
-      { name: 'Guardian Quarters', x: 884, y: 1384 },
-      { name: 'Holocron Vault', x: 3876, y: 2180 },
-      { name: 'Consular Quarters', x: 3488, y: 1860 },
-      { name: 'Saber Forge', x: 2644, y: 1348 },
-      { name: 'VIP Statues', x: 2648, y: 328 }
-    ];
+  { name: 'Sentinel Quarters', x: 1400, y: 3093 },
+  { name: 'Trial Room', x: 158, y: 2903 },
+  { name: 'Jails', x: 560, y: 2033 },
+  { name: 'Questioning Room', x: 947, y: 2385 },
+  { name: 'JAF Dojo', x: 1286, y: 2539 },
+  { name: 'Cantina', x: 2072, y: 2679 },
+  { name: 'Main TG Dojo', x: 2833, y: 2466 },
+  { name: 'Archives', x: 3187, y: 2012 },
+  { name: 'Combat Hall', x: 2014, y: 2005 },
+  { name: 'Lecture Hall', x: 2754, y: 2010 },
+  { name: 'Spawn', x: 1687, y: 885 },
+  { name: 'Council Room', x: 1680, y: 497 },
+  { name: 'Hangar Teleport', x: 3264, y: 585 },
+  { name: 'TG Dojo #2', x: 3168, y: 1038 },
+  { name: 'Consoles', x: 2006, y: 975 },
+  { name: 'Guardian Quarters', x: 812, y: 1272 },
+  { name: 'Holocron Vault', x: 3464, y: 2009 },
+  { name: 'Consular Quarters', x: 3114, y: 1713 },
+  { name: 'Saber Forge', x: 2361, y: 1242 },
+  { name: 'VIP Statues', x: 2365, y: 302 }
+];
 
     const markers = [];
     const poiListDiv = document.getElementById('poiList');
