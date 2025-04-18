@@ -99,13 +99,25 @@
   </style>
 </head>
 <body>
-  <audio id="bg-music" autoplay loop controls style="position:absolute; bottom:10px; left:10px; z-index:1001;">
+  <audio id="bg-music" autoplay loop style="position:absolute; bottom:10px; left:10px; z-index:1001;">
     <source src="https://cdn.pixabay.com/download/audio/2022/11/16/audio_59979e3d6d.mp3?filename=space-ambient-110997.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 
   <div id="sidebar">
     <h2>Points of Interest</h2>
+    <details>
+      <summary><strong>Combat Rooms</strong></summary>
+      <div id="combatRooms"></div>
+    </details>
+    <details>
+      <summary><strong>Meditation Chambers</strong></summary>
+      <div id="meditationChambers"></div>
+    </details>
+    <details>
+      <summary><strong>Lecture Rooms</strong></summary>
+      <div id="lectureRooms"></div>
+    </details>
     <div id="poiList"></div>
     <img src="noFilter.png" alt="Jedi Knight Echoes of Darkness" />
   </div>
@@ -129,13 +141,9 @@
       setTimeout(() => ripple.remove(), 1000);
     }
 
-    setInterval(() => {
-      document.querySelectorAll('.leaflet-marker-icon').forEach(el => addRippleEffect(el));
-    }, 5000);
-
     const map = L.map('map', {
       crs: L.CRS.Simple,
-      minZoom: -2,
+      minZoom: -5,
       maxZoom: 2,
       zoomControl: true
     });
@@ -144,73 +152,24 @@
     const mapHeight = 7830;
     const bounds = [[0, 0], [mapHeight, mapWidth]];
     const mainLayer = L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-    map.setView([mapHeight / 2, mapWidth / 2], -2);
+    map.setView([mapHeight / 2, mapWidth / 2], -3);
 
-    setTimeout(() => {
-      map.invalidateSize();
-      const miniMap = new L.Control.MiniMap(
-        L.imageOverlay('JK-EODMAP.png', bounds),
-        {
-          toggleDisplay: true,
-          minimized: false,
-          width: 200,
-          height: 200
-        }
-      ).addTo(map);
-    }, 200);
+    const miniMap = new L.Control.MiniMap(
+      L.imageOverlay('JK-EODMAP.png', bounds),
+      {
+        toggleDisplay: true,
+        minimized: false,
+        width: 200,
+        height: 200,
+        zoomLevelOffset: -4,
+        aimingRectOptions: {color: "#0ff", weight: 1, clickable: false},
+        shadowRectOptions: {color: "#0ff", weight: 1, clickable: false, opacity: 0, fillOpacity: 0}
+      }
+    ).addTo(map);
 
-    const pois = [
-      { name: 'Sentinel Quarters', x: 3032, y: 6784 },
-      { name: 'Trial Room', x: 304, y: 6304 },
-      { name: 'Jails', x: 1176, y: 4448 },
-      { name: 'Questioning Room', x: 2056, y: 5164 },
-      { name: 'JAF Dojo', x: 2768, y: 5564 },
-      { name: 'Cantina', x: 4484, y: 5832 },
-      { name: 'Main TG Dojo', x: 6160, y: 5380 },
-      { name: 'Archives', x: 6996, y: 4376 },
-      { name: 'Combat Hall', x: 4372, y: 4360 },
-      { name: 'Lecture Hall', x: 5992, y: 4376 },
-      { name: 'Spawn', x: 3676, y: 1960 },
-      { name: 'Council Room', x: 3684, y: 1056 },
-      { name: 'Hangar Teleport', x: 7112, y: 1268 },
-      { name: 'TG Dojo #2', x: 6928, y: 2252 },
-      { name: 'Guardian Quarters', x: 1780, y: 1984 },
-      { name: 'Holocron Vault', x: 7744, y: 4352 },
-      { name: 'Consular Quarters', x: 6968, y: 3476 },
-      { name: 'Saber Forge', x: 5292, y: 2696 },
-      { name: 'VIP Statues', x: 5296, y: 600 }
-    ];
-
-    const markers = [];
-    const poiListDiv = document.getElementById('poiList');
-
-    pois.forEach(poi => {
-      const marker = L.marker([poi.y, poi.x]).bindPopup(`<strong>${poi.name}</strong>`);
-      marker.poiName = poi.name.toLowerCase();
-      markers.push(marker);
-
-      const item = document.createElement('div');
-      item.className = 'poi-item';
-      item.textContent = poi.name;
-      item.addEventListener('click', () => {
-        marker.addTo(map);
-        map.flyTo([poi.y, poi.x], -1, { duration: 0.7 });
-        marker.openPopup();
-      });
-      poiListDiv.appendChild(item);
-    });
-
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-      const value = e.target.value.toLowerCase();
-      markers.forEach(marker => {
-        const match = marker.poiName.includes(value);
-        if (value && match) {
-          marker.addTo(map);
-        } else {
-          map.removeLayer(marker);
-        }
-      });
-    });
+    setInterval(() => {
+      document.querySelectorAll('.leaflet-marker-icon').forEach(el => addRippleEffect(el));
+    }, 5000);
   </script>
 </body>
 </html>
