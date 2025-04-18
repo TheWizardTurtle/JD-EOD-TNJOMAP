@@ -77,6 +77,18 @@
 <body>
   <div id="sidebar">
     <h2>Points of Interest</h2>
+    <details open>
+      <summary><strong>Combat Rooms</strong></summary>
+      <div id="combatRooms"></div>
+    </details>
+    <details open>
+      <summary><strong>Meditation Chambers</strong></summary>
+      <div id="meditationChambers"></div>
+    </details>
+    <details open>
+      <summary><strong>Lecture Rooms</strong></summary>
+      <div id="lectureRooms"></div>
+    </details>
     <div id="poiList"></div>
   </div>
   <div id="searchBox">
@@ -201,6 +213,9 @@ setTimeout(() => {
 
     const markers = [];
     const poiListDiv = document.getElementById('poiList');
+    const combatContainer = document.getElementById('combatRooms');
+    const meditationContainer = document.getElementById('meditationChambers');
+    const lectureContainer = document.getElementById('lectureRooms');
 
     pois.forEach(poi => {
       let pinColor = '#0ff';
@@ -255,7 +270,10 @@ setTimeout(() => {
         map.flyTo([poi.y, poi.x], -1, { duration: 0.7 });
         marker.openPopup();
       });
-      poiListDiv.appendChild(item);
+      if (poi.name.startsWith('Combat Room')) combatContainer.appendChild(item);
+      else if (poi.name.startsWith('Meditation Chamber')) meditationContainer.appendChild(item);
+      else if (poi.name.startsWith('Lecture Room')) lectureContainer.appendChild(item);
+      else poiListDiv.appendChild(item);
     });
 
     document.getElementById('searchInput').addEventListener('input', function(e) {
