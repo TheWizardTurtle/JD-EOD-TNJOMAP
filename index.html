@@ -100,13 +100,9 @@
     const mapHeight = 8500;
     const bounds = [[0, 0], [mapHeight, mapWidth]];
 
-    const image = new Image();
-    image.onload = function() {
-      const overlay = L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-      map.fitBounds(bounds);
-      setTimeout(() => map.invalidateSize(), 200);
-    };
-    image.src = 'JK-EODMAP.png';
+    L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+map.fitBounds(bounds);
+setTimeout(() => map.invalidateSize(), 200);
 
     const pois = [
       { name: 'Sentinel Quarters', x: 1520, y: 3360 },
