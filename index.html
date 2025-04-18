@@ -65,14 +65,14 @@
       color: #0ff;
     }
     .custom-pin {
-  animation: glowPulse 1.2s ease-in-out infinite;
-}
+      animation: glowPulse 1.2s ease-in-out infinite;
+    }
     @keyframes glowPulse {
       0% { transform: scale(1); opacity: 1; }
       50% { transform: scale(1.2); opacity: 0.6; }
       100% { transform: scale(1); opacity: 1; }
     }
-      .ping {
+    .ping {
       position: relative;
     }
     .ping::after {
@@ -89,7 +89,6 @@
       opacity: 0.6;
       z-index: -1;
     }
-
     @keyframes ripple {
       0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; }
       100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
@@ -117,57 +116,7 @@
     <input type="text" id="searchInput" placeholder="Search POI..." />
   </div>
   <div id="map"></div>
-
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
-<script>
-// Toggle markers on category open/close
-function toggleCategoryMarkers(prefix, visible) {
-  markers.forEach(marker => {
-    if (marker.poiName.startsWith(prefix.toLowerCase())) {
-      if (visible && !marker.visible) {
-        marker.addTo(map);
-        const pingDiv = marker.getElement().querySelector('div');
-        if (pingDiv) pingDiv.classList.add('ping');
-        setTimeout(() => pingDiv?.classList.remove('ping'), 1000);
-        marker.visible = true;
-      } else if (!visible && marker.visible) {
-        map.removeLayer(marker);
-        marker.visible = false;
-      }
-    }
-  });
-}
-
-document.querySelectorAll('details').forEach(detail => {
-  detail.addEventListener('toggle', function () {
-    const title = this.querySelector('summary strong').textContent;
-    if (title === 'Combat Rooms') toggleCategoryMarkers('Combat Room', this.open);
-    else if (title === 'Meditation Chambers') toggleCategoryMarkers('Meditation Chamber', this.open);
-    else if (title === 'Lecture Rooms') toggleCategoryMarkers('Lecture Room', this.open);
-  });
-});
-</script>
-
-<script>
-// Optional: Add a reset view button
-const resetBtn = document.createElement('button');
-resetBtn.textContent = 'Reset View';
-resetBtn.style.position = 'absolute';
-resetBtn.style.top = '20px';
-resetBtn.style.right = '20px';
-resetBtn.style.padding = '10px 16px';
-resetBtn.style.background = '#0ff';
-resetBtn.style.border = 'none';
-resetBtn.style.borderRadius = '6px';
-resetBtn.style.cursor = 'pointer';
-resetBtn.style.fontWeight = 'bold';
-resetBtn.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.4)';
-resetBtn.onclick = () => {
-  map.setView([mapHeight / 2, mapWidth / 2], -2);
-};
-document.body.appendChild(resetBtn);
-</script>
   <script>
     const map = L.map('map', {
       crs: L.CRS.Simple,
@@ -181,10 +130,8 @@ document.body.appendChild(resetBtn);
     const bounds = [[0, 0], [mapHeight, mapWidth]];
 
     L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-map.setView([mapHeight / 2, mapWidth / 2], -2);
-setTimeout(() => {
-  map.invalidateSize();
-}, 200);
+    map.setView([mapHeight / 2, mapWidth / 2], -2);
+    setTimeout(() => map.invalidateSize(), 200);
 
     const pois = [
   // Existing POIs
@@ -262,47 +209,39 @@ setTimeout(() => {
   { name: 'Lecture Room 10', x: 3352, y: 6793 }
 ];
 
+
     const markers = [];
-    const poiListDiv = document.getElementById('poiList');
     const combatContainer = document.getElementById('combatRooms');
     const meditationContainer = document.getElementById('meditationChambers');
     const lectureContainer = document.getElementById('lectureRooms');
+    const poiListDiv = document.getElementById('poiList');
+
+    function getPinColor(name) {
+      if (name.startsWith('Combat Room')) return '#1f8dd6';
+      if (name.startsWith('Meditation Chamber')) return '#90ee90';
+      if (name.startsWith('Lecture Room')) return '#006400';
+      if (name === 'Guardian Quarters') return '#3498db';
+      if (name === 'Consular Quarters') return '#2ecc71';
+      if (name === 'Sentinel Quarters') return '#f1c40f';
+      if (name === 'Combat Hall') return '#1f8dd6';
+      if (name === 'Saber Forge') return '#ffffff';
+      if (name === 'VIP Statues') return '#ffd700';
+      if (name.includes('Dojo')) return '#f1c40f';
+      if (name === 'Lecture Hall') return '#00ff99';
+      if (name === 'Archives') return '#39ff14';
+      if (name === 'Hangar Teleport') return '#888';
+      if (name === 'Council Room') return '#ffd700';
+      if (name === 'Spawn') return '#800000';
+      if (name === 'Jails' || name === 'Questioning Room') return '#e74c3c';
+      return '#0ff';
+    }
 
     pois.forEach(poi => {
-      let pinColor = '#0ff';
-      if (poi.name === 'Guardian Quarters') pinColor = '#3498db'; // blue
-      else if (poi.name === 'Consular Quarters') pinColor = '#2ecc71'; // green
-      else if (poi.name === 'Sentinel Quarters') pinColor = '#f1c40f'; // yellow
-      else if (poi.name === 'Questioning Room' || poi.name === 'Jails') pinColor = '#e74c3c'; // red
-      else if (poi.name === 'Combat Hall') pinColor = '#1f8dd6'; // different shade of blue
-      else if (poi.name === 'Saber Forge') pinColor = '#ffffff'; // white
-      else if (poi.name === 'VIP Statues') pinColor = '#ffd700'; // gold
-      else if (poi.name === 'TG Dojo #2' || poi.name === 'Main TG Dojo') pinColor = '#f1c40f'; // yellow
-      else if (poi.name === 'Archives') pinColor = '#39ff14'; // neon green
-      else if (poi.name === 'Lecture Hall') pinColor = '#00ff99'; // neon green alt
-      else if (poi.name === 'Hangar Teleport') pinColor = '#888888'; // gray
-      else if (poi.name === 'Council Room') pinColor = '#ffd700'; // gold
-      else if (poi.name === 'Spawn') pinColor = '#800000'; // maroon
-      else if (poi.name.startsWith('Combat Room')) pinColor = '#1f8dd6'; // combat blue
-      else if (poi.name.startsWith('Meditation Chamber')) pinColor = '#90ee90'; // light green
-      else if (poi.name.startsWith('Lecture Room')) pinColor = '#006400'; // dark green // blue
-      else if (poi.name === 'Consular Quarters') pinColor = '#2ecc71'; // green
-      else if (poi.name === 'Sentinel Quarters') pinColor = '#f1c40f'; // yellow
-      else if (poi.name === 'Questioning Room' || poi.name === 'Jails') pinColor = '#e74c3c'; // red
-      else if (poi.name === 'Combat Hall') pinColor = '#1f8dd6'; // different shade of blue
-
+      const color = getPinColor(poi.name);
       const icon = L.divIcon({
         className: '',
         iconSize: [14, 14],
-        html: `<div style="
-          background-color: ${pinColor};
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          border: 2px solid ${pinColor};
-          box-shadow: 0 0 8px ${pinColor};
-          animation: glowPulse 1.2s ease-in-out infinite;
-        "></div>`
+        html: `<div style="background:${color};width:14px;height:14px;border-radius:50%;border:2px solid ${color};box-shadow:0 0 8px ${color};animation:glowPulse 1.2s ease-in-out infinite;"></div>`
       });
 
       const marker = L.marker([poi.y, poi.x], { icon }).bindPopup(`<strong>${poi.name}</strong>`);
@@ -313,33 +252,78 @@ setTimeout(() => {
       const item = document.createElement('div');
       item.className = 'poi-item';
       item.textContent = poi.name;
-      item.addEventListener('click', () => {
+      item.onclick = () => {
         if (!marker.visible) {
           marker.addTo(map);
           marker.visible = true;
         }
-        map.flyTo([poi.y, poi.x], -1, { duration: 0.7 });
+        map.flyTo([poi.y, poi.x], -1);
         marker.openPopup();
-      });
+      };
+
       if (poi.name.startsWith('Combat Room')) combatContainer.appendChild(item);
       else if (poi.name.startsWith('Meditation Chamber')) meditationContainer.appendChild(item);
       else if (poi.name.startsWith('Lecture Room')) lectureContainer.appendChild(item);
       else poiListDiv.appendChild(item);
     });
 
-    document.getElementById('searchInput').addEventListener('input', function(e) {
-      const value = e.target.value.toLowerCase();
+    document.getElementById('searchInput').addEventListener('input', e => {
+      const query = e.target.value.toLowerCase();
       markers.forEach(marker => {
-        const match = marker.poiName.includes(value);
-        if (value && match && !marker.visible) {
+        const match = marker.poiName.includes(query);
+        if (query && match && !marker.visible) {
           marker.addTo(map);
           marker.visible = true;
-        } else if ((!value || !match) && marker.visible) {
+        } else if ((!query || !match) && marker.visible) {
           map.removeLayer(marker);
           marker.visible = false;
         }
       });
     });
+
+    function toggleCategoryMarkers(prefix, visible) {
+      markers.forEach(marker => {
+        if (marker.poiName.startsWith(prefix.toLowerCase())) {
+          if (visible && !marker.visible) {
+            marker.addTo(map);
+            const pingDiv = marker.getElement()?.querySelector('div');
+            if (pingDiv) pingDiv.classList.add('ping');
+            setTimeout(() => pingDiv?.classList.remove('ping'), 1000);
+            marker.visible = true;
+          } else if (!visible && marker.visible) {
+            map.removeLayer(marker);
+            marker.visible = false;
+          }
+        }
+      });
+    }
+
+    document.querySelectorAll('details').forEach(detail => {
+      detail.addEventListener('toggle', function () {
+        const title = this.querySelector('summary strong').textContent;
+        if (title === 'Combat Rooms') toggleCategoryMarkers('Combat Room', this.open);
+        else if (title === 'Meditation Chambers') toggleCategoryMarkers('Meditation Chamber', this.open);
+        else if (title === 'Lecture Rooms') toggleCategoryMarkers('Lecture Room', this.open);
+      });
+    });
+
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'Reset View';
+    resetBtn.style.position = 'absolute';
+    resetBtn.style.top = '20px';
+    resetBtn.style.right = '20px';
+    resetBtn.style.padding = '10px 16px';
+    resetBtn.style.background = '#0ff';
+    resetBtn.style.border = 'none';
+    resetBtn.style.borderRadius = '6px';
+    resetBtn.style.cursor = 'pointer';
+    resetBtn.style.fontWeight = 'bold';
+    resetBtn.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.4)';
+    resetBtn.onclick = () => {
+      map.setView([mapHeight / 2, mapWidth / 2], -2);
+    };
+    document.body.appendChild(resetBtn);
   </script>
 </body>
 </html>
+
