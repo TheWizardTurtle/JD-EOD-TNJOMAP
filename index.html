@@ -97,7 +97,7 @@
   </style>
 </head>
 <body>
-  <audio autoplay loop id="bg-music">
+  <audio autoplay loop id="bg-music" style="display:none">
     <source src="https://cdn.pixabay.com/download/audio/2022/11/16/audio_59979e3d6d.mp3?filename=space-ambient-110997.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
@@ -116,7 +116,7 @@
       <div id="lectureRooms"></div>
     </details>
     <div id="poiList"></div>
-    <img src="noFilter.webp" alt="Jedi Knight Echoes of Darkness" />
+    <img src="noFilter.webp" alt="Jedi Knight Echoes of Darkness" onerror="this.style.display='none'" />
   </div>
   <div id="searchBox">
     <input type="text" id="searchInput" placeholder="Search POI..." />
@@ -185,7 +185,7 @@
     minimized: false,
     width: 150,
     height: 150,
-    zoomLevelOffset: -4
+    zoomLevelFixed: -3
   }).addTo(map);
 }, 200);
 
