@@ -152,6 +152,18 @@ setTimeout(() => {
       else if (poi.name === 'Sentinel Quarters') pinColor = '#f1c40f'; // yellow
       else if (poi.name === 'Questioning Room' || poi.name === 'Jails') pinColor = '#e74c3c'; // red
       else if (poi.name === 'Combat Hall') pinColor = '#1f8dd6'; // different shade of blue
+      else if (poi.name === 'Saber Forge') pinColor = '#ffffff'; // white
+      else if (poi.name === 'VIP Statues') pinColor = '#ffd700'; // gold
+      else if (poi.name === 'TG Dojo #2' || poi.name === 'Main TG Dojo') pinColor = '#f1c40f'; // yellow
+      else if (poi.name === 'Archives') pinColor = '#39ff14'; // neon green
+      else if (poi.name === 'Lecture Hall') pinColor = '#00ff99'; // neon green alt
+      else if (poi.name === 'Hangar Teleport') pinColor = '#888888'; // gray
+      else if (poi.name === 'Council Room') pinColor = '#ffd700'; // gold
+      else if (poi.name === 'Spawn') pinColor = '#800000'; // maroon // blue
+      else if (poi.name === 'Consular Quarters') pinColor = '#2ecc71'; // green
+      else if (poi.name === 'Sentinel Quarters') pinColor = '#f1c40f'; // yellow
+      else if (poi.name === 'Questioning Room' || poi.name === 'Jails') pinColor = '#e74c3c'; // red
+      else if (poi.name === 'Combat Hall') pinColor = '#1f8dd6'; // different shade of blue
 
       const icon = L.divIcon({
         className: '',
@@ -180,7 +192,7 @@ setTimeout(() => {
           marker.addTo(map);
           marker.visible = true;
         }
-        map.setView([poi.y, poi.x], -1);
+        map.flyTo([poi.y, poi.x], -1, { duration: 0.7 });
         marker.openPopup();
       });
       poiListDiv.appendChild(item);
