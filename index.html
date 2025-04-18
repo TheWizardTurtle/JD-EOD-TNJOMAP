@@ -11,10 +11,30 @@
       height: 100%;
       font-family: 'Segoe UI', sans-serif;
       background: #0d0d0d;
+      display: flex;
+    }
+    #sidebar {
+      width: 260px;
+      background: #111;
+      color: #0ff;
+      overflow-y: auto;
+      padding: 20px;
+      box-shadow: 2px 0 8px rgba(0,255,255,0.1);
+    }
+    #sidebar h2 {
+      margin-top: 0;
+    }
+    .poi-item {
+      padding: 6px;
+      cursor: pointer;
+    }
+    .poi-item:hover {
+      background: #0ff;
+      color: #000;
     }
     #map {
+      flex: 1;
       height: 100%;
-      width: 100%;
     }
     .leaflet-popup-content-wrapper {
       background: #111;
@@ -24,7 +44,7 @@
     #searchBox {
       position: absolute;
       top: 20px;
-      left: 20px;
+      left: 280px;
       z-index: 1000;
       background: rgba(0, 0, 0, 0.8);
       border-radius: 8px;
@@ -40,17 +60,27 @@
       background-color: #222;
       color: #0ff;
     }
-    .flash {
-      animation: flashPulse 1.2s infinite;
+    .custom-pin {
+      background-color: #0ff;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 2px solid #0ff;
+      box-shadow: 0 0 8px #0ff;
+      animation: glowPulse 1.2s ease-in-out infinite;
     }
-    @keyframes flashPulse {
-      0% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(1.3); }
-      100% { opacity: 1; transform: scale(1); }
+    @keyframes glowPulse {
+      0% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.2); opacity: 0.6; }
+      100% { transform: scale(1); opacity: 1; }
     }
   </style>
 </head>
 <body>
+  <div id="sidebar">
+    <h2>Points of Interest</h2>
+    <div id="poiList"></div>
+  </div>
   <div id="searchBox">
     <input type="text" id="searchInput" placeholder="Search POI..." />
   </div>
@@ -96,29 +126,41 @@
     ];
 
     const markers = [];
+    const poiListDiv = document.getElementById('poiList');
 
     pois.forEach(poi => {
-      const marker = L.circleMarker([poi.y, poi.x], {
-        radius: 10,
-        color: '#0ff',
-        fillColor: '#0ff',
-        fillOpacity: 0.9,
-        className: 'flash',
-      }).bindPopup(`<strong>${poi.name}</strong>`);
+      const icon = L.divIcon({
+        className: 'custom-pin',
+        iconSize: [14, 14]
+      });
 
+      const marker = L.marker([poi.y, poi.x], { icon }).bindPopup(`<strong>${poi.name}</strong>`);
       marker.poiName = poi.name.toLowerCase();
       marker.visible = false;
       markers.push(marker);
+
+      const item = document.createElement('div');
+      item.className = 'poi-item';
+      item.textContent = poi.name;
+      item.addEventListener('click', () => {
+        if (!marker.visible) {
+          marker.addTo(map);
+          marker.visible = true;
+        }
+        map.setView([poi.y, poi.x], 0);
+        marker.openPopup();
+      });
+      poiListDiv.appendChild(item);
     });
 
     document.getElementById('searchInput').addEventListener('input', function(e) {
       const value = e.target.value.toLowerCase();
       markers.forEach(marker => {
         const match = marker.poiName.includes(value);
-        if (match && !marker.visible) {
+        if (value && match && !marker.visible) {
           marker.addTo(map);
           marker.visible = true;
-        } else if (!match && marker.visible) {
+        } else if ((!value || !match) && marker.visible) {
           map.removeLayer(marker);
           marker.visible = false;
         }
