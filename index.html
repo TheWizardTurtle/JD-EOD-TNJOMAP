@@ -90,7 +90,24 @@
   </div>
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">// Optional: Add a reset view button
+const resetBtn = document.createElement('button');
+resetBtn.textContent = 'Reset View';
+resetBtn.style.position = 'absolute';
+resetBtn.style.top = '20px';
+resetBtn.style.right = '20px';
+resetBtn.style.padding = '10px 16px';
+resetBtn.style.background = '#0ff';
+resetBtn.style.border = 'none';
+resetBtn.style.borderRadius = '6px';
+resetBtn.style.cursor = 'pointer';
+resetBtn.style.fontWeight = 'bold';
+resetBtn.style.boxShadow = '0 0 10px rgba(0, 255, 255, 0.4)';
+resetBtn.onclick = () => {
+  map.setView([mapHeight / 2, mapWidth / 2], -2);
+};
+document.body.appendChild(resetBtn);
+</script>
   <script>
     const map = L.map('map', {
       crs: L.CRS.Simple,
@@ -135,9 +152,17 @@ setTimeout(() => {
     const poiListDiv = document.getElementById('poiList');
 
     pois.forEach(poi => {
+      let pinColor = '#0ff';
+      if (poi.name === 'Guardian Quarters') pinColor = '#3498db'; // blue
+      else if (poi.name === 'Consular Quarters') pinColor = '#2ecc71'; // green
+      else if (poi.name === 'Sentinel Quarters') pinColor = '#f1c40f'; // yellow
+      else if (poi.name === 'Questioning Room' || poi.name === 'Jails') pinColor = '#e74c3c'; // red
+      else if (poi.name === 'Combat Hall') pinColor = '#1f8dd6'; // different shade of blue
+
       const icon = L.divIcon({
         className: 'custom-pin',
-        iconSize: [14, 14]
+        iconSize: [14, 14],
+        html: `<div style="background-color: ${pinColor}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${pinColor}; box-shadow: 0 0 8px ${pinColor}; animation: glowPulse 1.2s ease-in-out infinite;"></div>`
       });
 
       const marker = L.marker([poi.y, poi.x], { icon }).bindPopup(`<strong>${poi.name}</strong>`);
@@ -153,7 +178,7 @@ setTimeout(() => {
           marker.addTo(map);
           marker.visible = true;
         }
-        map.setView([poi.y, poi.x], 0);
+        map.setView([poi.y, poi.x], -1);
         marker.openPopup();
       });
       poiListDiv.appendChild(item);
@@ -175,4 +200,3 @@ setTimeout(() => {
   </script>
 </body>
 </html>
-
