@@ -154,9 +154,17 @@ setTimeout(() => {
       else if (poi.name === 'Combat Hall') pinColor = '#1f8dd6'; // different shade of blue
 
       const icon = L.divIcon({
-        className: 'custom-pin',
+        className: '',
         iconSize: [14, 14],
-        html: `<div style="background-color: ${pinColor}; width: 14px; height: 14px; border-radius: 50%; border: 2px solid ${pinColor}; box-shadow: 0 0 8px ${pinColor}; animation: glowPulse 1.2s ease-in-out infinite;"></div>`
+        html: `<div style="
+          background-color: ${pinColor};
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          border: 2px solid ${pinColor};
+          box-shadow: 0 0 8px ${pinColor};
+          animation: glowPulse 1.2s ease-in-out infinite;
+        "></div>`
       });
 
       const marker = L.marker([poi.y, poi.x], { icon }).bindPopup(`<strong>${poi.name}</strong>`);
