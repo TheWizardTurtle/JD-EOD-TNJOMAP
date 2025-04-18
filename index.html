@@ -11,7 +11,7 @@
       height: 100%;
       font-family: 'Segoe UI', sans-serif;
       background: #0d0d0d;
-      display: flex;
+      display: block;
     }
     #sidebar {
       width: 260px;
@@ -33,7 +33,9 @@
       color: #000;
     }
     #map {
-      flex: 1;
+      position: absolute;
+      top: 0;
+      left: 260px;
       height: 100%;
       z-index: 0;
     }
