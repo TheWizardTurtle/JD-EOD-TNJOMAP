@@ -101,6 +101,7 @@
 
     const image = L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
     map.fitBounds(bounds);
+    setTimeout(() => map.invalidateSize(), 200);
 
     const pois = [
       { name: 'Sentinel Quarters', x: 1520, y: 3360 },
