@@ -96,25 +96,31 @@
   </div>
   <div id="map"></div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-// Show all markers in category when details are opened
-function revealCategoryMarkers(prefix) {
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+// Toggle markers on category open/close
+function toggleCategoryMarkers(prefix, visible) {
   markers.forEach(marker => {
-    if (marker.poiName.startsWith(prefix.toLowerCase()) && !marker.visible) {
-      marker.addTo(map);
-      marker.visible = true;
+    if (marker.poiName.startsWith(prefix.toLowerCase())) {
+      if (visible && !marker.visible) {
+        marker.addTo(map);
+        marker.visible = true;
+      } else if (!visible && marker.visible) {
+        map.removeLayer(marker);
+        marker.visible = false;
+      }
     }
   });
 }
 
-document.querySelector('details summary strong:contains("Combat Rooms")').parentElement.addEventListener('toggle', function (e) {
-  if (this.open) revealCategoryMarkers('Combat Room');
-});
-document.querySelector('details summary strong:contains("Meditation Chambers")').parentElement.addEventListener('toggle', function (e) {
-  if (this.open) revealCategoryMarkers('Meditation Chamber');
-});
-document.querySelector('details summary strong:contains("Lecture Rooms")').parentElement.addEventListener('toggle', function (e) {
-  if (this.open) revealCategoryMarkers('Lecture Room');
+document.querySelectorAll('details').forEach(detail => {
+  detail.addEventListener('toggle', function () {
+    const title = this.querySelector('summary strong').textContent;
+    if (title === 'Combat Rooms') toggleCategoryMarkers('Combat Room', this.open);
+    else if (title === 'Meditation Chambers') toggleCategoryMarkers('Meditation Chamber', this.open);
+    else if (title === 'Lecture Rooms') toggleCategoryMarkers('Lecture Room', this.open);
+  });
 });
 </script>
 
