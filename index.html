@@ -192,10 +192,21 @@
         document.getElementById(`${cat}Detail`).addEventListener('toggle', function() {
           if (this.open) {
             map.addLayer(layers[cat]);
+            // Delay ping to ensure correct rendering
             setTimeout(() => {
               layers[cat].eachLayer(m => {
-                const el = m.getElement(); if (el) { el.classList.add('ping'); setTimeout(() => el.classList.remove('ping'), 1000); }
+                const el = m.getElement();
+                if (el) {
+                  el.classList.add('ping');
+                  setTimeout(() => el.classList.remove('ping'), 1000);
+                }
               });
+            }, 800);
+          } else {
+            map.removeLayer(layers[cat]);
+          }
+        });
+      });
             }, 400);
           } else {
             map.removeLayer(layers[cat]);
