@@ -68,9 +68,9 @@
         {
           toggleDisplay: true,
           mapOptions: { crs: L.CRS.Simple, zoomControl: false },
-          width: 150,
-          height: 150,
-          zoomLevelOffset: -2
+          width: 200,
+          height: 200,
+          zoomLevelFixed: map.getMinZoom() - 2
         }
       ).addTo(map);
 
