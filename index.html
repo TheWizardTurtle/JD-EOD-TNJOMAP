@@ -95,7 +95,31 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script type="module">
     const debounce = (fn, delay=200) => { let t; return (...a) => { clearTimeout(t); t=setTimeout(() => fn(...a), delay); }; };
-    const colorMap = {/*...*/}; const prefixMap = {/*...*/};
+    const colorMap = {
+      'sentinel quarters':'#f1c40f',
+      'trial room':'#d4a017',
+      'jails':'#e74c3c',
+      'questioning room':'#e74c3c',
+      'jaf dojo':'#5dade2',
+      'cantina':'#0ff',
+      'archives':'#39ff14',
+      'combat hall':'#1f75fe',
+      'lecture hall':'#00ff99',
+      'spawn':'#800000',
+      'council room':'#ffd700',
+      'hangar teleport':'#888888',
+      'tg dojo #2':'#f1c40f',
+      'main tg dojo':'#f1c40f',
+      'holocron vault':'#39ff14',
+      'consular quarters':'#2ecc71',
+      'saber forge':'#ffffff',
+      'vip statues':'#d4af37'
+    };
+    const prefixMap = {
+      'combat room':'#1f8dd6',
+      'meditation chamber':'#90ee90',
+      'lecture room':'#006400'
+    };
     const getPinColor = name => { /*...*/ };
     const pois = [
       // Static POIs
