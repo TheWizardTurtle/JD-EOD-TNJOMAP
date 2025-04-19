@@ -142,8 +142,30 @@
     ];
     let map, layers, currentMarker = null;
     function initMap() {
-      // Initialize map with Simple CRS
+      // Initialize map with Simple CRS and controls
       map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
+      const bounds = [[0, 0], [7830, 8192]];
+      // Add the image overlay
+      L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+      // Fit the map view to the full bounds
+      map.fitBounds(bounds);
+      // Prevent panning outside the image
+      map.setMaxBounds(bounds);
+      // Prepare layer groups
+      layers = {
+        combat: L.layerGroup().addTo(map),
+        meditation: L.layerGroup().addTo(map),
+        lecture: L.layerGroup().addTo(map),
+        others: L.layerGroup().addTo(map)
+      };
+      // Add minimap
+      const mini = L.imageOverlay('JK-EODMAP.png', bounds);
+      new L.Control.MiniMap(mini, {
+        toggleDisplay: true,
+        mapOptions: { crs: L.CRS.Simple },
+        zoomLevelFixed: -12
+      }).addTo(map);
+    });
       const bounds = [[0, 0], [7830, 8192]];
       // Add image and fit bounds to show full map on load
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
