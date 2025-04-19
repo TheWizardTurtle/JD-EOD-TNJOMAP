@@ -9,13 +9,18 @@
   <style>
     html, body { margin:0; padding:0; height:100%; }
     body { background:#0d0d0d; color:#0ff; font-family:'Segoe UI', sans-serif; overflow:hidden; }
-    .control-btn { padding:4px 8px; background:#0ff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 0 6px rgba(0,255,255,0.4); z-index:1100; }
-    /* Sidebar layout full height */
+    .control-btn { padding:4px 8px; background:#0ff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 0 6px rgba(0,255,255,0.4); z-index:1101; }
+    /* Sidebar full height */
     #sidebar { position:absolute; top:0; left:0; width:260px; bottom:0; background:#111; padding:10px; overflow-y:auto; box-shadow:2px 0 8px rgba(0,255,255,0.1); z-index:1000; transition:left .3s ease; }
     #sidebar.collapsed { left:-260px; }
+    #hamburger { position:absolute; top:10px; width:24px; height:24px; line-height:24px; text-align:center; }
+    /* Position hamburger relative to sidebar */
+    #hamburger.open { left:260px; }
+    #hamburger.closed { left:0; }
     .sidebar-header { margin-bottom:10px; display:flex; align-items:center; }
     #searchBox { flex:1; }
     #searchBox input { width:100%; padding:6px; border:none; border-radius:4px; background:#222; color:#0ff; }
+    #sidebar-buttons { margin-left:8px; display:flex; gap:4px; }
     #sidebar h2 { text-align:center; margin:0 0 10px; font-size:1.4em; font-weight:900; border-bottom:2px solid #0ff; padding-bottom:6px; }
     details { margin-bottom:8px; }
     summary { cursor:pointer; font-weight:700; font-size:1.1em; text-align:center; }
@@ -35,15 +40,16 @@
   </style>
 </head>
 <body>
+  <!-- Collapse button persists -->
+  <button id="hamburger" class="control-btn open">◀</button>
+
   <!-- Sidebar -->
   <div id="sidebar">
     <div class="sidebar-header">
       <div id="searchBox"><input id="searchInput" placeholder="Search POI..."/></div>
-      <div id="sidebar-buttons" style="margin-left:8px; display:flex; gap:4px;">
-        <button id="hamburger" class="control-btn">◀</button>
+      <div id="sidebar-buttons">
         <button id="highContrastToggle" class="control-btn">⚙</button>
       </div>
-    </div>
     </div>
     <h2>Points of Interest</h2>
     <details id="combatDetail"><summary>Combat Rooms</summary><ul id="combatRooms" class="poi-list"></ul></details>
@@ -58,51 +64,39 @@
       <button id="screenshotBtn" class="control-btn">📷</button>
     </div>
   </div>
+
   <div id="map"></div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Initialize map
       const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
       const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
       map.fitBounds(bounds, { animate: false });
-      const initZoom = map.getZoom();
-      map.setMinZoom(initZoom - 3);
-      map.setMaxBounds(bounds);
-      new L.Control.MiniMap(
-        L.imageOverlay('JK-EODMAP.png', bounds),
-        { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple}, zoomLevelFixed: map.getZoom()-2 }
-      ).addTo(map);
+      const initZoom = map.getZoom(); map.setMinZoom(initZoom - 3); map.setMaxBounds(bounds);
+      new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds), { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple}, zoomLevelFixed: map.getZoom()-2 }).addTo(map);
 
       // Controls
-      document.getElementById('hamburger').onclick = () => {
-        const sb = document.getElementById('sidebar');
-        sb.classList.toggle('collapsed');
-        // Recalculate map size after sidebar transition completes
-        const onTransitionEnd = (e) => {
-          if (e.propertyName === 'left') {
-            map.invalidateSize();
-            sb.removeEventListener('transitionend', onTransitionEnd);
-          }
-        };
-        sb.addEventListener('transitionend', onTransitionEnd);
+      const hamburger = document.getElementById('hamburger');
+      const sidebar = document.getElementById('sidebar');
+      hamburger.onclick = () => {
+        sidebar.classList.toggle('collapsed');
+        if (sidebar.classList.contains('collapsed')) {
+          hamburger.textContent = '▶';
+          hamburger.classList.replace('open','closed');
+        } else {
+          hamburger.textContent = '◀';
+          hamburger.classList.replace('closed','open');
+        }
       };
       document.getElementById('highContrastToggle').onclick = () => document.body.classList.toggle('high-contrast');
-      document.getElementById('resetBtn').onclick = () => map.flyToBounds(bounds, { animate: true });
-      document.getElementById('screenshotBtn').onclick = () => {
-        html2canvas(document.getElementById('map')).then(canvas => {
-          const a = document.createElement('a');
-          a.href = canvas.toDataURL();
-          a.download = 'map.png';
-          a.click();
-        });
-      };
+      document.getElementById('resetBtn').onclick = () => map.flyToBounds(bounds, { animate:true });
+      document.getElementById('screenshotBtn').onclick = () => html2canvas(document.getElementById('map')).then(canvas => { const a=document.createElement('a'); a.href=canvas.toDataURL(); a.download='map.png'; a.click(); });
 
-      // Color logic
-      const prefixMap = { 'Combat Room': '#1f8dd6', 'Meditation Chamber': '#90ee90', 'Lecture Room': '#006400' };
+      // Color logic and POI population here...
+    const prefixMap = { 'Combat Room': '#1f8dd6', 'Meditation Chamber': '#90ee90', 'Lecture Room': '#006400' };
       const colorMap = {
         'Sentinel Quarters':'#f1c40f','Trial Room':'#d4a017','Jails':'#e74c3c','Questioning Room':'#e74c3c',
         'JAF Dojo':'#5dade2','Cantina':'#0ff','Main TG Dojo':'#f1c40f','TG Dojo #2':'#f1c40f',
@@ -215,6 +209,9 @@
         document.getElementById(cat+'Detail').addEventListener('toggle', function(){ markersByCategory[cat].forEach(m=> this.open?map.addLayer(m):map.removeLayer(m)); });
       });
     });
+  </script>
+</body>
+</html>
   </script>
 </body>
 </html>
