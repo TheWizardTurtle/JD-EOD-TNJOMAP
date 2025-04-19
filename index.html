@@ -46,7 +46,7 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script>
-    // Full POI array and colorMaps as defined earlier
+    // Full POI data
     const pois = [
       { name: 'Sentinel Quarters', x: 3032, y: 6784 },
       { name: 'Trial Room', x: 304, y: 6304 },
@@ -136,6 +136,7 @@
       'VIP Statues': '#d4af37',
       'Saber Forge': '#ffffff'
     };
+
     const prefixMap = { 'Combat Room':'#1f8dd6','Meditation Chamber':'#90ee90','Lecture Room':'#006400' };
     function getColor(name) {
       return colorMap[name] || Object.entries(prefixMap).find(([k]) => name.startsWith(k))?.[1] || '#0ff';
@@ -146,28 +147,14 @@
       map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
       const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-      // Fit to full extent immediately
       map.fitBounds(bounds, { animate: false });
       map.setMaxBounds(bounds);
-      layers = {
-        combat: L.layerGroup().addTo(map),
-        meditation: L.layerGroup().addTo(map),
-        lecture: L.layerGroup().addTo(map),
-        others: L.layerGroup().addTo(map)
-      };
-      new L.Control.MiniMap(
-        L.imageOverlay('JK-EODMAP.png', bounds),
-        { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple}, zoomLevelFixed: map.getZoom()-2 }
-      ).addTo(map);
+      layers = { combat:L.layerGroup().addTo(map), meditation:L.layerGroup().addTo(map), lecture:L.layerGroup().addTo(map), others:L.layerGroup().addTo(map) };
+      new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds), { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple}, zoomLevelFixed: map.getZoom()-2 }).addTo(map);
     }
 
     function initSidebar() {
-      const containers = {
-        combat: document.getElementById('combatRooms'),
-        meditation: document.getElementById('meditationChambers'),
-        lecture: document.getElementById('lectureRooms'),
-        others: document.getElementById('poiList')
-      };
+      const containers = { combat:document.getElementById('combatRooms'), meditation:document.getElementById('meditationChambers'), lecture:document.getElementById('lectureRooms'), others:document.getElementById('poiList') };
       Object.values(containers).forEach(c => c.innerHTML = '');
       pois.forEach(p => {
         if (p.name === 'Holocron Vault') return;
@@ -179,36 +166,24 @@
         else if (p.name.startsWith('Meditation Chamber')) grp = layers.meditation;
         else if (p.name.startsWith('Lecture Room')) grp = layers.lecture;
         grp.addLayer(marker);
-        const li = document.createElement('li');
-        li.className = 'poi-item'; li.textContent = p.name; li.style.color = col;
+        const li = document.createElement('li'); li.className='poi-item'; li.textContent=p.name; li.style.color=col;
         li.onclick = () => {
           if (currentMarker && currentMarker !== marker) map.removeLayer(currentMarker);
           if (!map.hasLayer(marker)) map.addLayer(marker);
-          currentMarker = marker;
-          marker.openPopup();
-          map.flyTo([p.y,p.x], map.getZoom(), { duration:1 });
+          currentMarker = marker; marker.openPopup(); map.flyTo([p.y,p.x], map.getZoom(), { duration:1 });
         };
-        const key = grp === layers.combat ? 'combat' : grp === layers.meditation ? 'meditation' : grp === layers.lecture ? 'lecture' : 'others';
+        const key = grp===layers.combat?'combat':grp===layers.meditation?'meditation':grp===layers.lecture?'lecture':'others';
         containers[key].appendChild(li);
       });
-      // Custom order for 'others'
-      const order = [
-        'Sentinel Quarters','Guardian Quarters','Consular Quarters','Main TG Dojo','TG Dojo #2','Trial Room','VIP Statues','Council Room','JAF Dojo','Combat Hall','Cantina','Lecture Hall','Archives','Saber Forge','Spawn','Questioning Room','Jails','Hangar Teleport'
-      ];
-      const ul = containers.others;
-      const items = Array.from(ul.children);
-      ul.innerHTML = '';
-      order.forEach(name => {
-        const el = items.find(li => li.textContent === name);
-        if (el) ul.appendChild(el);
-      });
+      const order=['Sentinel Quarters','Guardian Quarters','Consular Quarters','Main TG Dojo','TG Dojo #2','Trial Room','VIP Statues','Council Room','JAF Dojo','Combat Hall','Cantina','Lecture Hall','Archives','Saber Forge','Spawn','Questioning Room','Jails','Hangar Teleport'];
+      const ul=containers.others; const items=Array.from(ul.children); ul.innerHTML=''; order.forEach(name=>{ const it=items.find(li=>li.textContent===name); if(it) ul.appendChild(it); });
     }
 
     function initControls() {
       document.getElementById('hamburger').onclick = () => document.getElementById('sidebar').classList.toggle('collapsed');
       document.getElementById('highContrastToggle').onclick = () => document.body.classList.toggle('high-contrast');
       document.getElementById('resetBtn').onclick = () => map.fitBounds([[0,0],[7830,8192]], { animate:false });
-      document.getElementById('screenshotBtn').onclick = () => html2canvas(document.getElementById('map')).then(canvas => { const a = document.createElement('a'); a.href = canvas.toDataURL(); a.download = 'map.png'; a.click(); });
+      document.getElementById('screenshotBtn').onclick = () => html2canvas(document.getElementById('map')).then(canvas => { const a=document.createElement('a'); a.href=canvas.toDataURL(); a.download='map.png'; a.click(); });
     }
 
     document.addEventListener('DOMContentLoaded', () => { initMap(); initSidebar(); initControls(); });
