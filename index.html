@@ -18,7 +18,7 @@
     #hamburger{top:20px;left:20px;}#highContrastToggle{top:20px;left:70px;}#resetBtn{top:20px;right:20px;}#screenshotBtn{top:20px;right:100px;}
     #searchBox{position:absolute;top:20px;left:300px;z-index:1001;background:rgba(0,0,0,0.8);padding:8px;border-radius:4px;box-shadow:0 0 6px rgba(0,255,255,0.5);}#searchInput{width:200px;padding:6px;font-size:14px;border-radius:4px;border:none;background:#222;color:#0ff;}
     body.high-contrast{background:#fff;color:#000;}body.high-contrast #sidebar{background:#eee;color:#000;}body.high-contrast .control-btn{background:#000;color:#fff;}body.high-contrast .leaflet-popup-content-wrapper{background:#fff;color:#000;border-color:#000;}
-    @keyframes ripple{0%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}100%{transform:translate(-50%,-50%) scale(3);opacity:0;}}.ping{position:relative;}.ping::after{content:"";position:absolute;top:50%;left:50%;width:20px;height:20px;background-color:inherit;border-radius:50%;transform:translate(-50%,-50%);animation:ripple 1s forwards;opacity:0.6;z-index:-1;} .poi-item{padding:6px;cursor:pointer;}
+    @keyframes ripple{0%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}100%{transform:translate(-50%,-50%) scale(3);opacity:0;}} .ping{position:relative;} .ping::after{content:""; position:absolute; top:50%; left:50%; width:20px; height:20px; background-color:inherit; border-radius:50%; transform:translate(-50%,-50%); animation:ripple 1s forwards; opacity:0.6; z-index:-1;} .poi-item{padding:6px;cursor:pointer;}
   </style>
 </head>
 <body>
@@ -41,79 +41,142 @@
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script type="module">
-    const debounce=(fn,delay=200)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),delay);}};
-    const colorMap={'guardian quarters':'#3498db','consular quarters':'#2ecc71','sentinel quarters':'#f1c40f','questioning room':'#e74c3c','jails':'#e74c3c','combat hall':'#1f8dd6','saber forge':'#ffffff','vip statues':'#ffd700','tg dojo #2':'#f1c40f','main tg dojo':'#f1c40f','archives':'#39ff14','lecture hall':'#00ff99','hangar teleport':'#888888','council room':'#ffd700','spawn':'#800000'};
-    const prefixMap={'combat room':'#1f8dd6','meditation chamber':'#90ee90','lecture room':'#006400'};
-    const getPinColor=name=>{const k=name.toLowerCase();if(colorMap[k])return colorMap[k];for(const p in prefixMap)if(k.startsWith(p))return prefixMap[p];return '#0ff';};
-    const pois=[
-      { name:'Sentinel Quarters',x:3032,y:6784 },{ name:'Trial Room',x:304,y:6304 },{ name:'Jails',x:1176,y:4448 },
-      { name:'Questioning Room',x:2056,y:5164 },{ name:'JAF Dojo',x:2768,y:5564 },{ name:'Cantina',x:4484,y:5832 },
-      { name:'Main TG Dojo',x:6160,y:5380 },{ name:'Archives',x:6996,y:4376 },{ name:'Combat Hall',x:4372,y:4360 },
-      { name:'Lecture Hall',x:5992,y:4376 },{ name:'Spawn',x:3676,y:1960 },{ name:'Council Room',x:3684,y:1056 },
-      { name:'Hangar Teleport',x:7112,y:1268 },{ name:'TG Dojo #2',x:6928,y:2252 },{ name:'Guardian Quarters',x:1780,y:1984 },
-      { name:'Holocron Vault',x:7744,y:4352 },{ name:'Consular Quarters',x:6968,y:3476 },{ name:'Saber Forge',x:5292,y:2696 },
-      { name:'VIP Statues',x:5296,y:600 },
+    const debounce = (fn, delay = 200) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; };
+    const colorMap = { 'guardian quarters':'#3498db','consular quarters':'#2ecc71','sentinel quarters':'#f1c40f','questioning room':'#e74c3c','jails':'#e74c3c','combat hall':'#1f8dd6','saber forge':'#ffffff','vip statues':'#ffd700','tg dojo #2':'#f1c40f','main tg dojo':'#f1c40f','archives':'#39ff14','lecture hall':'#00ff99','hangar teleport':'#888888','council room':'#ffd700','spawn':'#800000'};
+    const prefixMap = { 'combat room':'#1f8dd6','meditation chamber':'#90ee90','lecture room':'#006400' };
+    const getPinColor = name => { const k = name.toLowerCase(); if (colorMap[k]) return colorMap[k]; for (const p in prefixMap) if (k.startsWith(p)) return prefixMap[p]; return '#0ff'; };
+
+    const pois = [
+      { name: 'Sentinel Quarters', x: 3032, y: 6784 },
+      { name: 'Trial Room', x: 304, y: 6304 },
+      { name: 'Jails', x: 1176, y: 4448 },
+      { name: 'Questioning Room', x: 2056, y: 5164 },
+      { name: 'JAF Dojo', x: 2768, y: 5564 },
+      { name: 'Cantina', x: 4484, y: 5832 },
+      { name: 'Main TG Dojo', x: 6160, y: 5380 },
+      { name: 'Archives', x: 6996, y: 4376 },
+      { name: 'Combat Hall', x: 4372, y: 4360 },
+      { name: 'Lecture Hall', x: 5992, y: 4376 },
+      { name: 'Spawn', x: 3676, y: 1960 },
+      { name: 'Council Room', x: 3684, y: 1056 },
+      { name: 'Hangar Teleport', x: 7112, y: 1268 },
+      { name: 'TG Dojo #2', x: 6928, y: 2252 },
+      { name: 'Guardian Quarters', x: 1780, y: 1984 },
+      { name: 'Holocron Vault', x: 7744, y: 4352 },
+      { name: 'Consular Quarters', x: 6968, y: 3476 },
+      { name: 'Saber Forge', x: 5292, y: 2696 },
+      { name: 'VIP Statues', x: 5296, y: 600 },
       // Combat Rooms
-      ...Array.from({length:23},(_,i)=>({ name:`Combat Room ${i+1}`, x:0, y:0 })),
+      ...Array.from({length:23},(_,i)=>({ name: `Combat Room ${i+1}`, x: 100 + i*50, y: 100 + i*30 })),
       // Meditation Chambers
-      ...Array.from({length:15},(_,i)=>({ name:`Meditation Chamber ${i+1}`, x:0, y:0 })),
+      ...Array.from({length:15},(_,i)=>({ name: `Meditation Chamber ${i+1}`, x: 200 + i*40, y: 200 + i*20 })),
       // Lecture Rooms
-      ...Array.from({length:10},(_,i)=>({ name:`Lecture Room ${i+1}`, x:0, y:0 })),
+      ...Array.from({length:10},(_,i)=>({ name: `Lecture Room ${i+1}`, x: 300 + i*60, y: 300 + i*25 })),
     ];
 
-    let map,layers;
-    function initMap(){
-      map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2,zoomControl:true});
-      const bounds=[[0,0],[7830,8192]];
-      L.imageOverlay('JK-EODMAP.png',bounds).addTo(map);
-      location.hash?
-        map.setView(location.hash.slice(1).split(',').map(Number),
-                     Number(location.hash.slice(1).split(',')[2])):
-        map.setView([7830/2,8192/2],-2);
-      map.on('moveend',()=>{const c=map.getCenter(),z=map.getZoom();location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);});
-      layers={combat:L.layerGroup(),meditation:L.layerGroup(),lecture:L.layerGroup(),others:L.layerGroup()};
-      const miniLayer=L.imageOverlay('JK-EODMAP.png',bounds);
-      new L.Control.MiniMap(miniLayer,{toggleDisplay:true,mapOptions:{crs:L.CRS.Simple},zoomLevelFixed:-12,position:'bottomright'}).addTo(map);
+    let map, layers;
+    function initMap() {
+      map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2, zoomControl: true });
+      const bounds = [[0, 0], [7830, 8192]];
+      L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+      if (location.hash) {
+        const [lat, lng, z] = location.hash.slice(1).split(',').map(Number);
+        map.setView([lat, lng], z);
+      } else map.setView([7830/2, 8192/2], -2);
+      map.on('moveend', () => {
+        const c = map.getCenter(), z = map.getZoom();
+        location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);
+      });
+      layers = { combat: L.layerGroup(), meditation: L.layerGroup(), lecture: L.layerGroup(), others: L.layerGroup() };
+      // MiniMap
+      const miniLayer = L.imageOverlay('JK-EODMAP.png', bounds);
+      new L.Control.MiniMap(miniLayer, { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: -12, position: 'bottomright' }).addTo(map);
     }
 
-    function initSidebarAndMarkers(){
-      const containers={combat:document.getElementById('combatRooms'),meditation:document.getElementById('meditationChambers'),lecture:document.getElementById('lectureRooms'),others:document.getElementById('poiList')};
-      Object.values(containers).forEach(c=>c.innerHTML='');
-      pois.forEach(p=>{
-        const icon=L.divIcon({html:`<div style="background:${getPinColor(p.name)};width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px ${getPinColor(p.name)};border:2px solid #fff;"></div>",iconSize:[18,18]});
-        const marker=L.marker([p.y,p.x],{icon});
-        let grp=layers.others;
-        if(p.name.toLowerCase().startsWith('combat room'))grp=layers.combat;
-        else if(p.name.toLowerCase().startsWith('meditation chamber'))grp=layers.meditation;
-        else if(p.name.toLowerCase().startsWith('lecture room'))grp=layers.lecture;
-        const item=document.createElement('div');item.className='poi-item';item.tabIndex=0;item.role='button';item.textContent=p.name;
-        item.addEventListener('click',()=>{
-          if(!map.hasLayer(marker))marker.addTo(map);
-          map.flyTo([p.y,p.x],0,{duration:0.7});
-          marker.bindPopup(`<strong>${p.name}</strong>`).openPopup();
-          setTimeout(()=>{const el=marker.getElement();if(el){el.classList.add('ping');setTimeout(()=>el.classList.remove('ping'),1000);}},300);
+    function initSidebarAndMarkers() {
+      const containers = {
+        combat: document.getElementById('combatRooms'),
+        meditation: document.getElementById('meditationChambers'),
+        lecture: document.getElementById('lectureRooms'),
+        others: document.getElementById('poiList')
+      };
+      Object.values(containers).forEach(c => c.innerHTML = '');
+      pois.forEach(p => {
+        const icon = L.divIcon({ html: `<div style="background:${getPinColor(p.name)};width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px ${getPinColor(p.name)};border:2px solid #fff;"></div>`, iconSize: [18, 18] });
+        const marker = L.marker([p.y, p.x], { icon }).bindPopup(`<strong>${p.name}</strong>`);
+        let grp = layers.others;
+        if (p.name.toLowerCase().startsWith('combat room')) grp = layers.combat;
+        else if (p.name.toLowerCase().startsWith('meditation chamber')) grp = layers.meditation;
+        else if (p.name.toLowerCase().startsWith('lecture room')) grp = layers.lecture;
+        // attach marker to group but do not add to map until toggled
+        grp.addLayer(marker);
+
+        const item = document.createElement('div');
+        item.className = 'poi-item';
+        item.tabIndex = 0;
+        item.role = 'button';
+        item.textContent = p.name;
+        item.addEventListener('click', () => {
+          // ensure group is added
+          if (!map.hasLayer(grp)) map.addLayer(grp);
+          // pan then ping
+          map.flyTo([p.y, p.x], 0, { duration: 0.7 });
+          marker.openPopup();
+          setTimeout(() => {
+            const el = marker.getElement();
+            if (el) {
+              el.classList.add('ping');
+              setTimeout(() => el.classList.remove('ping'), 1000);
+            }
+          }, 300);
         });
-        item.addEventListener('keydown',e=>{if(e.key==='Enter')item.click();});
-        if(grp===layers.combat)containers.combat.appendChild(item);
-        else if(grp===layers.meditation)containers.meditation.appendChild(item);
-        else if(grp===layers.lecture)containers.lecture.appendChild(item);
+        item.addEventListener('keydown', e => { if (e.key === 'Enter') item.click(); });
+
+        if (grp === layers.combat) containers.combat.appendChild(item);
+        else if (grp === layers.meditation) containers.meditation.appendChild(item);
+        else if (grp === layers.lecture) containers.lecture.appendChild(item);
         else containers.others.appendChild(item);
       });
-      ['combat','meditation','lecture'].forEach(cat=>{document.getElementById(`${cat}Detail`).addEventListener('toggle',function(){if(this.open){map.addLayer(layers[cat]);layers[cat].eachLayer(m=>{const el=m.getElement();if(el){el.classList.add('ping');setTimeout(()=>el.classList.remove('ping'),1000);}});}else map.removeLayer(layers[cat]);});});
+      // category toggles
+      ['combat','meditation','lecture'].forEach(cat => {
+        document.getElementById(`${cat}Detail`).addEventListener('toggle', function() {
+          if (this.open) map.addLayer(layers[cat]); else map.removeLayer(layers[cat]);
+          if (this.open) {
+            layers[cat].eachLayer(m => {
+              const el = m.getElement();
+              if (el) {
+                el.classList.add('ping');
+                setTimeout(() => el.classList.remove('ping'), 1000);
+              }
+            });
+          }
+        });
+      });
     }
 
-    function initControls(){
-      document.getElementById('hamburger').onclick=()=>document.getElementById('sidebar').classList.toggle('collapsed');
-      document.getElementById('highContrastToggle').onclick=()=>document.body.classList.toggle('high-contrast');
-      document.getElementById('resetBtn').onclick=()=>map.setView([7830/2,8192/2],-2);
-      document.getElementById('screenshotBtn').onclick=()=>html2canvas(document.getElementById('map')).then(canvas=>{const a=document.createElement('a');a.download='map.png';a.href=canvas.toDataURL();a.click();});
+    function initControls() {
+      document.getElementById('hamburger').onclick = () => document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('highContrastToggle').onclick = () => document.body.classList.toggle('high-contrast');
+      document.getElementById('resetBtn').onclick = () => map.setView([7830/2, 8192/2], -2);
+      document.getElementById('screenshotBtn').onclick = () => html2canvas(document.getElementById('map')).then(canvas => { const a = document.createElement('a'); a.download = 'map.png'; a.href = canvas.toDataURL(); a.click(); });
     }
 
-    function initSearch(){
-      document.getElementById('searchInput').addEventListener('input',debounce(e=>{const t=e.target.value.toLowerCase();Object.values(layers).forEach(grp=>grp.eachLayer(m=>{const nm=m.getPopup().getContent().toLowerCase();if(t&&nm.includes(t)&&!map.hasLayer(m))map.addLayer(m);}));}),200);
+    function initSearch() {
+      document.getElementById('searchInput').addEventListener('input', debounce(e => {
+        const term = e.target.value.toLowerCase();
+        Object.values(layers).forEach(grp => grp.eachLayer(m => {
+          const nm = m.getPopup().getContent().toLowerCase();
+          if (term && nm.includes(term) && !map.hasLayer(m)) map.addLayer(m);
+        }));
+      }), 200);
     }
 
-    document.addEventListener('DOMContentLoaded',()=>{initMap();initSidebarAndMarkers();initControls();initSearch();});
+    document.addEventListener('DOMContentLoaded', () => {
+      initMap();
+      initSidebarAndMarkers();
+      initControls();
+      initSearch();
+    });
   </script>
 </body>
 </html>
