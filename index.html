@@ -180,7 +180,15 @@
         const key = grp===layers.combat?'combat':grp===layers.meditation?'meditation':grp===layers.lecture?'lecture':'others';
         containers[key].appendChild(li);
       });
-      // Reorder others per custom sequence here if needed
+      // Custom order for 'others' group
+      const otherOrder = ['Sentinel Quarters','Guardian Quarters','Consular Quarters','Main TG Dojo','TG Dojo #2','Trial Room','VIP Statues','Council Room','JAF Dojo','Combat Hall','Cantina','Lecture Hall','Archives','Saber Forge','Spawn','Questioning Room','Jails','Hangar Teleport'];
+      const otherUl = containers.others;
+      const otherItems = Array.from(otherUl.children);
+      otherUl.innerHTML = '';
+      otherOrder.forEach(title => {
+        const item = otherItems.find(li => li.textContent === title);
+        if (item) otherUl.appendChild(item);
+      });
     }
 
     function initControls() {
