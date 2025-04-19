@@ -9,15 +9,13 @@
   <style>
     html, body { margin:0; padding:0; height:100%; }
     body { background:#0d0d0d; color:#0ff; font-family:'Segoe UI', sans-serif; }
-    .control-btn { padding:4px 8px; background:#0ff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 0 6px rgba(0,255,255,0.4); }
+    .control-btn { padding:4px 8px; background:#0ff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 0 6px rgba(0,255,255,0.4); z-index:1100; }
     /* Sidebar layout */
-    #sidebar { position:absolute; top:60px; left:0; width:260px; bottom:0; background:#111; padding:10px; overflow-y:auto; box-shadow:2px 0 8px rgba(0,255,255,0.1); z-index:1000; }
+    #sidebar { position:absolute; top:60px; left:0; width:260px; bottom:0; background:#111; padding:10px; overflow-y:auto; box-shadow:2px 0 8px rgba(0,255,255,0.1); z-index:1000; transition:left .3s ease; }
     #sidebar.collapsed { left:-260px; }
-    .sidebar-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
-    #searchBox { flex:1; }
+    .sidebar-header { margin-bottom:10px; }
+    #searchBox { width:100%; }
     #searchBox input { width:100%; padding:6px; border:none; border-radius:4px; background:#222; color:#0ff; }
-    #sidebar-buttons { margin-left:8px; }
-    #sidebar-buttons .control-btn { margin-left:4px; }
     #sidebar h2 { text-align:center; margin:0 0 10px; font-size:1.4em; font-weight:900; border-bottom:2px solid #0ff; padding-bottom:6px; }
     details { margin-bottom:8px; }
     summary { cursor:pointer; font-weight:700; font-size:1.1em; text-align:center; }
@@ -37,13 +35,13 @@
   </style>
 </head>
 <body>
+  <!-- Persistent Controls -->
+  <button id="hamburger" class="control-btn" style="position:absolute; top:10px; left:10px;">▶</button>
+  <button id="highContrastToggle" class="control-btn" style="position:absolute; top:10px; left:60px;">⚙</button>
+  <!-- Sidebar -->
   <div id="sidebar">
     <div class="sidebar-header">
       <div id="searchBox"><input id="searchInput" placeholder="Search POI..."/></div>
-      <div id="sidebar-buttons">
-        <button id="hamburger" class="control-btn">☰</button>
-        <button id="highContrastToggle" class="control-btn">⚙</button>
-      </div>
     </div>
     <h2>Points of Interest</h2>
     <details id="combatDetail"><summary>Combat Rooms</summary><ul id="combatRooms" class="poi-list"></ul></details>
@@ -76,6 +74,7 @@
         { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple}, zoomLevelFixed: map.getZoom()-2 }
       ).addTo(map);
 
+      // Controls
       document.getElementById('hamburger').onclick = () => {
         const sb = document.getElementById('sidebar');
         sb.classList.toggle('collapsed');
