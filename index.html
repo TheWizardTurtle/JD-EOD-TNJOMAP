@@ -213,16 +213,25 @@
         if(p.name==='Saber Forge') item.classList.add('saber');
 
         item.onclick = () => {
-          if(grp===layers.others){
-            map.hasLayer(marker)?map.removeLayer(marker):map.addLayer(marker);
+          // Pan to marker position
+          map.panTo([p.y, p.x]);
+          if (grp === layers.others) {
+            map.hasLayer(marker) ? map.removeLayer(marker) : map.addLayer(marker);
           } else {
-            map.hasLayer(grp)?map.removeLayer(grp):map.addLayer(grp);
+            map.hasLayer(grp) ? map.removeLayer(grp) : map.addLayer(grp);
           }
-          // ping and radar
+          // Open popup and ping
+          marker.openPopup();
           const el = marker.getElement();
-          if(el){ el.classList.add('ping'); setTimeout(()=>el.classList.remove('ping'),1000);
-            const radar = document.createElement('div'); radar.className='radar'; radar.style.background=col; el.appendChild(radar);
-            setTimeout(()=>el.removeChild(radar),1500);
+          if (el) {
+            el.classList.add('ping');
+            setTimeout(() => el.classList.remove('ping'), 1000);
+            // radar effect
+            const radar = document.createElement('div');
+            radar.className = 'radar';
+            radar.style.background = col;
+            el.appendChild(radar);
+            setTimeout(() => el.removeChild(radar), 1500);
           }
         };
         cont[grp===layers.combat?'combat':grp===layers.meditation?'meditation':grp===layers.lecture?'lecture':'others'].appendChild(item);
