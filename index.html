@@ -142,7 +142,20 @@
       pois.forEach(p=>{if(p.name==='Holocron Vault')return;let col=getColor(p.name);
         let icon=L.divIcon({html:`<div style="position:relative;width:20px;height:20px;"><div class='radar' style='background:${col}'></div><div style='position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;background:${col};transform:translate(-50%,-50%)'></div></div>`,iconSize:[20,20],iconAnchor:[10,10]});
         let m=L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);m.poi=p.name.toLowerCase();markers.push(m);
-        let li=document.createElement('li');li.textContent=p.name;li.style.color=col;li.onclick=()=>{if(current)map.removeLayer(current);map.addLayer(m);current=m;m.openPopup();map.flyTo([p.y,p.x],map.getZoom(),{duration:1});};
+        let li=document.createElement('li');li.textContent=p.name;li.style.color=col;li.onclick = () => {
+          // toggle marker on second click
+          if (map.hasLayer(m)) {
+            map.removeLayer(m);
+            current = null;
+            return;
+          }
+          // show this marker and hide any previous
+          if (current) map.removeLayer(current);
+          map.addLayer(m);
+          current = m;
+          m.openPopup();
+          map.flyTo([p.y, p.x], map.getZoom(), { duration: 1 });
+        };
         if(p.name.startsWith('Combat Room'))cont.combat.appendChild(li);
         else if(p.name.startsWith('Meditation Chamber'))cont.meditation.appendChild(li);
         else if(p.name.startsWith('Lecture Room'))cont.lecture.appendChild(li);
