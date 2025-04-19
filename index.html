@@ -74,7 +74,16 @@
       ).addTo(map);
 
       // Controls
-      document.getElementById('hamburger').onclick = () => document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('hamburger').onclick = () => {
+          const sb = document.getElementById('sidebar');
+          sb.classList.toggle('collapsed');
+          // After sidebar transition, invalidate size and keep map centered
+          setTimeout(() => {
+            map.invalidateSize();
+            const center = map.getCenter();
+            map.setView(center, map.getZoom(), { animate: false });
+          }, 300);
+        };
       document.getElementById('highContrastToggle').onclick = () => document.body.classList.toggle('high-contrast');
       document.getElementById('resetBtn').onclick = () => map.flyToBounds(bounds, { animate: true });
       document.getElementById('screenshotBtn').onclick = () => {
