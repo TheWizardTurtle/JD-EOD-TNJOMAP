@@ -7,36 +7,33 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
   <style>
-    html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; }
-    body { background: #0d0d0d; color: #0ff; font-family: 'Segoe UI', sans-serif; }
-    .control-btn { position: absolute; padding: 4px 8px; background: #0ff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; box-shadow: 0 0 6px rgba(0,255,255,0.4); z-index: 1101; }
-    /* Sidebar full height */
-    #sidebar { position: absolute; top: 0; left: 0; width: 260px; bottom: 0; background: #111; padding: 10px; overflow-y: auto; box-shadow: 2px 0 8px rgba(0,255,255,0.1); z-index: 1000; transition: left .3s ease; }
-    #sidebar.collapsed { left: -260px; }
-    /* Collapse button positions */
-    #hamburger { top: 10px; }
-    #sidebar:not(.collapsed) ~ #hamburger { left: 260px; }
-    #sidebar.collapsed ~ #hamburger { left: 0; }
-    .sidebar-header { margin-bottom: 10px; display: flex; }
-    #searchBox { flex: 1; }
-    #searchBox input { width: 100%; padding: 6px; border: none; border-radius: 4px; background: #222; color: #0ff; }
-    #sidebar h2 { text-align: center; margin: 0 0 10px; font-size: 1.4em; font-weight: 900; border-bottom: 2px solid #0ff; padding-bottom: 6px; }
-    details { margin-bottom: 8px; }
-    summary { cursor: pointer; font-weight: 700; font-size: 1.1em; text-align: center; }
-    #combatDetail summary { color: #1f8dd6; }
-    #meditationDetail summary { color: #228b22; }
-    #lectureDetail summary { color: #adff2f; }
-    summary::-webkit-details-marker, summary::marker { display: none; }
-    ul.poi-list { list-style: none; padding: 0; margin: 0 0 10px; }
-    ul.poi-list li { padding: 6px; margin: 4px 0; text-align: center; cursor: pointer; font-weight: 600; }
-    .sidebar-sep { border-top: 1px solid #555; margin: 6px 0; }
-    $1 visibility: hidden; }
-    @keyframes radar { 0% { transform: scale(1); opacity: 0.7; } 100% { transform: scale(3); opacity: 0; } }
-    .radar { position: absolute; width: 20px; height: 20px; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 50%; animation: radar 3s ease-out infinite; pointer-events: none; z-index: 1000; }
+    html, body { margin:0; padding:0; height:100%; overflow:hidden; }
+    body { background:#0d0d0d; color:#0ff; font-family:'Segoe UI',sans-serif; }
+    .control-btn { position:absolute; padding:4px 8px; background:#0ff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 0 6px rgba(0,255,255,0.4); z-index:1101; }
+    #sidebar { position:absolute; top:0; left:0; width:260px; bottom:0; background:#111; padding:10px; overflow-y:auto; box-shadow:2px 0 8px rgba(0,255,255,0.1); transition:left .3s ease; }
+    #sidebar.collapsed { left:-260px; }
+    #hamburger { top:10px; }
+    #sidebar:not(.collapsed) ~ #hamburger { left:260px; }
+    #sidebar.collapsed ~ #hamburger { left:0; }
+    .sidebar-header { margin-bottom:10px; display:flex; align-items:center; }
+    #searchBox { flex:1; }
+    #searchBox input { width:100%; padding:6px; border:none; border-radius:4px; background:#222; color:#0ff; }
+    #sidebar h2 { text-align:center; margin:0 0 10px; font-size:1.4em; font-weight:900; border-bottom:2px solid #0ff; padding-bottom:6px; }
+    details { margin-bottom:8px; }
+    summary { cursor:pointer; font-weight:700; font-size:1.1em; text-align:center; }
+    #combatDetail summary { color:#1f8dd6; }
+    #meditationDetail summary { color:#228b22; }
+    #lectureDetail summary { color:#adff2f; }
+    summary::-webkit-details-marker, summary::marker { display:none; }
+    ul.poi-list { list-style:none; padding:0; margin:0 0 10px; }
+    ul.poi-list li { padding:6px; margin:4px 0; text-align:center; cursor:pointer; font-weight:600; }
+    .sidebar-sep { border-top:1px solid #555; margin:6px 0; }
+    #map { position:absolute; top:0; left:0; right:0; bottom:0; z-index:500; }
+    @keyframes radar { 0%{transform:scale(1);opacity:0.7;}100%{transform:scale(3);opacity:0;} }
+    .radar { position:absolute; width:20px; height:20px; top:50%; left:50%; transform:translate(-50%,-50%); border-radius:50%; animation:radar 3s ease-out infinite; pointer-events:none; z-index:1000; }
   </style>
 </head>
 <body>
-  <!-- Sidebar -->
   <div id="sidebar">
     <div class="sidebar-header">
       <div id="searchBox"><input id="searchInput" placeholder="Search POI..."/></div>
@@ -50,7 +47,6 @@
     <hr class="sidebar-sep"/>
     <ul id="poiList" class="poi-list"></ul>
   </div>
-  <!-- Collapse button always visible -->
   <button id="hamburger" class="control-btn open">◀</button>
   <div id="map"></div>
 
@@ -58,26 +54,19 @@
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // Initialize map
       const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
       const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-      // Fit entire map on load
       map.fitBounds(bounds, { animate: false });
       const initZoom = map.getZoom();
       map.setMinZoom(initZoom - 3);
       map.setMaxBounds(bounds);
-      // Zoom out fully to show entire map by default
       map.setZoom(map.getMinZoom());
-      // show map after zoom applied
-      map.once('zoomend', () => document.getElementById('map').style.visibility = 'visible');
-      // Minimap fully zoomed out
       new L.Control.MiniMap(
         L.imageOverlay('JK-EODMAP.png', bounds),
-        { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple, zoomControl: false }, zoomLevelFixed: map.getMinZoom() }
+        { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple, zoomControl:false}, zoomLevelFixed: map.getMinZoom() }
       ).addTo(map);
 
-      // Collapse toggle
       const hamburger = document.getElementById('hamburger');
       const sidebar = document.getElementById('sidebar');
       hamburger.onclick = () => {
@@ -85,7 +74,6 @@
         hamburger.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
       };
 
-      // Color and POI logic
       const prefixMap = { 'Combat Room': '#1f8dd6', 'Meditation Chamber': '#90ee90', 'Lecture Room': '#006400' };
       const colorMap = {
         'Sentinel Quarters':'#f1c40f','Trial Room':'#d4a017','Jails':'#e74c3c','Questioning Room':'#e74c3c',
@@ -95,7 +83,6 @@
       };
       const getColor = name => colorMap[name] || Object.entries(prefixMap).find(([k]) => name.startsWith(k))?.[1] || '#0ff';
 
-      // POIs
       const pois = [
       { name: 'Sentinel Quarters', x: 3032, y: 6784 },
       { name: 'Trial Room', x: 304, y: 6304 },
@@ -164,76 +151,45 @@
       { name: 'Lecture Room 10', x: 3352, y: 6793 }
     ];
 
-      const containers = {
-        combat: document.getElementById('combatRooms'),
-        meditation: document.getElementById('meditationChambers'),
-        lecture: document.getElementById('lectureRooms'),
-        others: document.getElementById('poiList')
-      };
-      Object.values(containers).forEach(c => c.innerHTML = '');
+      const containers = { combat:document.getElementById('combatRooms'), meditation:document.getElementById('meditationChambers'), lecture:document.getElementById('lectureRooms'), others:document.getElementById('poiList') };
+      Object.values(containers).forEach(c => c.innerHTML='');
       const markers = [];
       let currentMarker = null;
 
       pois.forEach(p => {
-        if (p.name === 'Holocron Vault') return;
+        if(p.name==='Holocron Vault') return;
         const color = getColor(p.name);
-        const iconHtml = `
-          <div style="position:relative;width:20px;height:20px;">
-            <div class="radar" style="background:${color}"></div>
-            <div style="position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;background:${color};transform:translate(-50%,-50%);"></div>
-          </div>
-        `;
-        const icon = L.divIcon({ html: iconHtml, iconSize: [20,20], iconAnchor: [10,10] });
-        const marker = L.marker([p.y, p.x], { icon }).bindPopup(`<strong>${p.name}</strong>`);
+        const iconHtml = `<div style="position:relative;width:20px;height:20px;"><div class=\"radar\" style=\"background:${color}\"></div><div style=\"position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;background:${color};transform:translate(-50%,-50%);\"></div></div>`;
+        const icon = L.divIcon({ html: iconHtml, iconSize:[20,20], iconAnchor:[10,10] });
+        const marker = L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);
         marker.poiName = p.name.toLowerCase();
         markers.push(marker);
 
-        // Sidebar entry
-        const li = document.createElement('li');
-        li.textContent = p.name;
-        li.style.color = color;
+        const li = document.createElement('li'); li.textContent=p.name; li.style.color=color;
         li.onclick = () => {
-          if (currentMarker) map.removeLayer(currentMarker);
-          map.addLayer(marker);
-          currentMarker = marker;
-          marker.openPopup();
-          map.flyTo([p.y, p.x], map.getZoom(), { duration: 1 });
+          if(currentMarker) map.removeLayer(currentMarker);
+          map.addLayer(marker); currentMarker=marker; marker.openPopup(); map.flyTo([p.y,p.x],map.getZoom(),{duration:1});
         };
-
-        // Categorize
-        if (p.name.startsWith('Combat Room')) containers.combat.appendChild(li);
-        else if (p.name.startsWith('Meditation Chamber')) containers.meditation.appendChild(li);
-        else if (p.name.startsWith('Lecture Room')) containers.lecture.appendChild(li);
+        if(p.name.startsWith('Combat Room')) containers.combat.appendChild(li);
+        else if(p.name.startsWith('Meditation Chamber')) containers.meditation.appendChild(li);
+        else if(p.name.startsWith('Lecture Room')) containers.lecture.appendChild(li);
         else containers.others.appendChild(li);
       });
 
-      // Search functionality
       document.getElementById('searchInput').addEventListener('input', e => {
         const term = e.target.value.toLowerCase();
         markers.forEach(m => {
-          if (term && m.poiName.includes(term)) {
-            if (!map.hasLayer(m)) map.addLayer(m);
-            // Pulse
-            const el = m.getElement();
-            if (el) {
-              const ping = document.createElement('div');
-              ping.className = 'radar';
-              ping.style.background = getColor(m.getPopup().getContent().replace(/<.*?>/g, ''));
-              el.appendChild(ping);
-              setTimeout(() => el.removeChild(ping), 1000);
-            }
-          }
+          if(m.poiName===term) {
+            if(!map.hasLayer(m)) map.addLayer(m);
+            const el=m.getElement(); if(el){ const ping=document.createElement('div'); ping.className='radar'; ping.style.background=getColor(m.getPopup().getContent().replace(/<.*?>/g,'')); el.appendChild(ping); setTimeout(()=>el.removeChild(ping),1000);}          
+          else map.removeLayer(m);
         });
       });
 
-      // Category toggles
-      ['combat','meditation','lecture'].forEach(cat => {
-        document.getElementById(cat + 'Detail').addEventListener('toggle', function() {
-          markers.forEach(m => {
-            if (m.poiName.startsWith(cat)) {
-              if (this.open) map.addLayer(m);
-              else map.removeLayer(m);
-            }
+      ['combat','meditation','lecture'].forEach(cat=>{
+        document.getElementById(cat+'Detail').addEventListener('toggle',function(){
+          markers.forEach(m=>{
+            if(m.poiName.startsWith(cat)) this.open?map.addLayer(m):map.removeLayer(m);
           });
         });
       });
