@@ -134,7 +134,7 @@
         lecture: L.layerGroup(),
         others: L.layerGroup()
       };
-      Object.values(layers).forEach(g => g.addTo(map));
+      
       const miniLayer = L.imageOverlay('JK-EODMAP.png', bounds);
       new L.Control.MiniMap(miniLayer, { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: -12, position: 'bottomright' }).addTo(map);
     }
