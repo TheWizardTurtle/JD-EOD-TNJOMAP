@@ -134,7 +134,25 @@
   { name: 'Lecture Room 10', x: 3352, y: 6793 }
 ];
 
-    const colorMap = { /* define colors for each non-category POI */ };
+    const colorMap = {
+      'Sentinel Quarters': '#f1c40f',
+      'Trial Room': '#d4a017',
+      'Jails': '#e74c3c',
+      'Questioning Room': '#e74c3c',
+      'JAF Dojo': '#5dade2',
+      'Cantina': '#0ff',
+      'Main TG Dojo': '#f1c40f',
+      'TG Dojo #2': '#f1c40f',
+      'Archives': '#39ff14',
+      'Combat Hall': '#1f75fe',
+      'Lecture Hall': '#adff2f',
+      'Consular Quarters': '#2ecc71',
+      'Spawn': '#800000',
+      'Council Room': '#ffd700',
+      'Hangar Teleport': '#888888',
+      'VIP Statues': '#d4af37',
+      'Saber Forge': '#ffffff'
+    };
     const prefixMap = { 'Combat Room':'#1f8dd6', 'Meditation Chamber':'#90ee90', 'Lecture Room':'#006400' };
     function getColor(name) {
       return colorMap[name] || Object.entries(prefixMap).find(([k])=>name.startsWith(k))?.[1] || '#0ff';
