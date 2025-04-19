@@ -14,7 +14,9 @@
     #sidebar {
       position:absolute; top:0; left:0;
       width:260px; height:100%; background:#111; color:#0ff;
-      overflow-y:auto; padding:20px;
+      overflow-y:auto;
+      /* increased top padding to clear control buttons */
+      padding:80px 20px 20px 20px;
       box-shadow:2px 0 8px rgba(0,255,255,0.1);
       transition: width .3s ease, padding .3s ease, box-shadow .3s ease;
       z-index:1000;
@@ -53,7 +55,7 @@
     #screenshotBtn { top:20px; right:100px; }
     /* Search Box inside sidebar */
     #searchBox {
-      margin:10px 0 20px;
+      margin:0 0 20px;
     }
     #searchInput {
       width:100%; padding:8px;
@@ -80,7 +82,7 @@
     /* Responsive tweaks */
     @media(max-width:768px) {
       #sidebar { width:0; padding:0; }
-      #sidebar.collapsed { width:260px; padding:20px; }
+      #sidebar.collapsed { width:260px; padding:80px 20px 20px 20px; }
       #map { left:0; width:100%; }
     }
   </style>
@@ -98,9 +100,9 @@
       <input id="searchInput" type="text" placeholder="Search POI..." aria-label="Search POIs" />
     </div>
     <h2>Points of Interest</h2>
-    <details><summary><strong>Combat Rooms</strong></summary><div id="combatRooms"></div></details>
-    <details><summary><strong>Meditation Chambers</strong></summary><div id="meditationChambers"></div></details>
-    <details><summary><strong>Lecture Rooms</strong></summary><div id="lectureRooms"></div></details>
+    <details id="combatDetail"><summary><strong>Combat Rooms</strong></summary><div id="combatRooms"></div></details>
+    <details id="meditationDetail"><summary><strong>Meditation Chambers</strong></summary><div id="meditationChambers"></div></details>
+    <details id="lectureDetail"><summary><strong>Lecture Rooms</strong></summary><div id="lectureRooms"></div></details>
     <div id="poiList"></div>
   </div>
 
@@ -124,8 +126,8 @@
     const prefixMap={ 'combat room':'#1f8dd6','meditation chamber':'#90ee90','lecture room':'#006400' };
     const getPinColor=name=>{const k=name.toLowerCase(); if(colorMap[k]) return colorMap[k]; for(const p in prefixMap) if(k.startsWith(p)) return prefixMap[p]; return '#0ff';};
 
-    // POIs array (same as before)
-    const pois=[
+    // POIs array (unchanged)
+     const pois=[
       { name: 'Sentinel Quarters', x: 3032, y: 6784 },
       { name: 'Trial Room', x: 304, y: 6304 },
       { name: 'Jails', x: 1176, y: 4448 },
@@ -194,6 +196,7 @@
       { name: 'Lecture Room 10', x: 3352, y: 6793 }
     ];
 
+
     let map, layers;
     function initMap(){
       map=L.map('map',{ crs:L.CRS.Simple, minZoom:-2, maxZoom:2, zoomControl:true });
@@ -203,72 +206,73 @@
       if(location.hash){ const [lat,lng,z]=location.hash.slice(1).split(',').map(Number); map.setView([lat,lng],z); }
       else map.setView([7830/2,8192/2],-2);
       map.on('moveend',()=>{
-        const c=map.getCenter(), z=map.getZoom();
-        location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);
+        const c=map.getCenter(), z=map.getZoom(); location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);
       });
-      // LayerGroups (no clustering)
+      // LayerGroups
       layers={ combat:L.layerGroup(), meditation:L.layerGroup(), lecture:L.layerGroup(), others:L.layerGroup() };
       Object.values(layers).forEach(g=>g.addTo(map));
-      // MiniMap overview
-      const osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png');
-      new L.Control.MiniMap(osm,{ toggleDisplay:true }).addTo(map);
+      // MiniMap using same image
+      const miniLayer=L.imageOverlay('JK-EODMAP.png',bounds);
+      new L.Control.MiniMap(miniLayer,{ toggleDisplay:true, mapOptions:{ crs:L.CRS.Simple } }).addTo(map);
     }
 
     function initSidebarAndMarkers(){
       const containers={ combat:document.getElementById('combatRooms'), meditation:document.getElementById('meditationChambers'), lecture:document.getElementById('lectureRooms'), others:document.getElementById('poiList') };
       pois.forEach(p=>{
         const color=getPinColor(p.name);
-        const icon=L.divIcon({ html:`<div style="background:${color};width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px ${color};animation:glowPulse 1.2s ease-in-out infinite;"></div>`, iconSize:[14,14] });
+        const icon=L.divIcon({ html:`<div style="background:${color};width:14px;height:14px;border-radius:50%;box-shadow:0 0 8px ${color};animation:glowPulse 1.2s ease-in-out infinite;"></div>", iconSize:[14,14] });
         const marker=L.marker([p.y,p.x],{ icon }).bindPopup(`<strong>${p.name}</strong>`);
-        // assign to group
-        const key=p.name.toLowerCase().split(' ')[0]; // simple prefix test
         let grp=layers.others;
         if(p.name.toLowerCase().startsWith('combat room')) grp=layers.combat;
         else if(p.name.toLowerCase().startsWith('meditation chamber')) grp=layers.meditation;
         else if(p.name.toLowerCase().startsWith('lecture room')) grp=layers.lecture;
         grp.addLayer(marker);
-        // sidebar item
         const item=document.createElement('div'); item.className='poi-item'; item.tabIndex=0; item.role='button'; item.textContent=p.name;
-        item.addEventListener('click',()=>{ map.flyTo([p.y,p.x],0,{duration:0.7}); marker.openPopup(); const el=marker.getElement(); el?.classList.add('bounce'); setTimeout(()=>el?.classList.remove('bounce'),600); });
+        item.addEventListener('click',()=>{
+          map.flyTo([p.y,p.x],0,{duration:0.7}); marker.openPopup();
+          const el=marker.getElement(); if(el){ el.classList.add('ping'); setTimeout(()=>el.classList.remove('ping'),1000); }
+        });
         item.addEventListener('keydown',e=>{ if(e.key==='Enter') item.click(); });
         if(grp===layers.combat) containers.combat.appendChild(item);
         else if(grp===layers.meditation) containers.meditation.appendChild(item);
         else if(grp===layers.lecture) containers.lecture.appendChild(item);
         else containers.others.appendChild(item);
       });
+      // Category click to flash all in group
+      document.getElementById('combatDetail').querySelector('summary').addEventListener('click',()=>{
+        layers.combat.eachLayer(m=>{ const el=m.getElement(); if(el){ el.classList.add('ping'); setTimeout(()=>el.classList.remove('ping'),1000); }});
+      });
+      document.getElementById('meditationDetail').querySelector('summary').addEventListener('click',()=>{
+        layers.meditation.eachLayer(m=>{ const el=m.getElement(); if(el){ el.classList.add('ping'); setTimeout(()=>el.classList.remove('ping'),1000); }});
+      });
+      document.getElementById('lectureDetail').querySelector('summary').addEventListener('click',()=>{
+        layers.lecture.eachLayer(m=>{ const el=m.getElement(); if(el){ el.classList.add('ping'); setTimeout(()=>el.classList.remove('ping'),1000); }});
+      });
     }
 
     function initControls(){
-      document.getElementById('hamburger').addEventListener('click',()=>{
-        document.getElementById('sidebar').classList.toggle('collapsed');
-      });
+      document.getElementById('hamburger').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('collapsed'));
       document.getElementById('highContrastToggle').addEventListener('click',()=>document.body.classList.toggle('high-contrast'));
       document.getElementById('resetBtn').addEventListener('click',()=>map.setView([7830/2,8192/2],-2));
       document.getElementById('screenshotBtn').addEventListener('click',()=>{
-        html2canvas(document.getElementById('map')).then(canvas=>{
-          const a=document.createElement('a'); a.download='map.png'; a.href=canvas.toDataURL(); a.click();
-        });
+        html2canvas(document.getElementById('map')).then(canvas=>{ const a=document.createElement('a'); a.download='map.png'; a.href=canvas.toDataURL(); a.click(); });
       });
     }
 
     function initSearch(){
       document.getElementById('searchInput').addEventListener('input', debounce(e=>{
         const term=e.target.value.toLowerCase();
-        Object.values(layers).forEach(group=>{
-          group.eachLayer(m=>{
-            const nm=m.getPopup().getContent().toLowerCase();
-            if(term && nm.includes(term)){
-              if(!map.hasLayer(m)) map.addLayer(m);
-              const el=m.getElement(); el?.classList.add('ping'); setTimeout(()=>el?.classList.remove('ping'),1000);
-            }
-          });
-        });
+        // Show matching, without flash
+        Object.values(layers).forEach(group=> group.eachLayer(marker=> {
+          const nm=marker.getPopup().getContent().toLowerCase();
+          if(term && nm.includes(term)){
+            if(!map.hasLayer(marker)) map.addLayer(marker);
+          }
+        }));
       },200));
     }
 
-    document.addEventListener('DOMContentLoaded',()=>{
-      initMap(); initSidebarAndMarkers(); initControls(); initSearch();
-    });
+    document.addEventListener('DOMContentLoaded',()=>{ initMap(); initSidebarAndMarkers(); initControls(); initSearch(); });
   </script>
 </body>
 </html>
