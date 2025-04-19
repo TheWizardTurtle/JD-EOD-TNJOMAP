@@ -52,7 +52,8 @@
       const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
       const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-      map.fitBounds(bounds, { animate: false });
+      // default to zoom level 3 centered
+      map.setView([bounds[1][0]/2, bounds[1][1]/2], 3, { animate: false });
       const fullZoom = map.getZoom(); map.setMinZoom(fullZoom - 3); map.setMaxBounds(bounds);
       new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds), { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: fullZoom - 2 }).addTo(map);
 
@@ -144,8 +145,8 @@
         const color = getColor(p.name);
         const iconHtml = `
           <div style="position:relative;width:20px;height:20px;">
-            <div class="radar" style="background:${color}"></div>
             <div style="position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;background:${color};transform:translate(-50%,-50%);"></div>
+            <div class="radar" style="background:${color}"></div>
           </div>
         `;
         const icon = L.divIcon({ html: iconHtml, iconSize:[20,20], className:'' });
