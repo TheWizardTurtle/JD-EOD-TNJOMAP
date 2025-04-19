@@ -160,7 +160,34 @@
 
     let map, layers, currentMarker;
     function initMap() {
-      map = L.map('map',{crs:L.CRS.Simple, zoomControl:true});
+      // Initialize map with Simple CRS and controls
+      map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
+      const bounds = [[0, 0], [7830, 8192]];
+      // Add image overlay
+      L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+      // Calculate the zoom level that fits the entire image
+      const fullZoom = map.getBoundsZoom(bounds, false);
+      // Calculate the center of the image
+      const center = [(bounds[0][0] + bounds[1][0]) / 2, (bounds[0][1] + bounds[1][1]) / 2];
+      // Immediately set view to center at the calculated zoom, no animation
+      map.setView(center, fullZoom, { animate: false });
+      // Restrict panning to image bounds
+      map.setMaxBounds(bounds);
+      // Prepare layer groups
+      layers = {
+        combat: L.layerGroup().addTo(map),
+        meditation: L.layerGroup().addTo(map),
+        lecture: L.layerGroup().addTo(map),
+        others: L.layerGroup().addTo(map)
+      };
+      // Add minimap at a slightly more zoomed-in level
+      const mini = L.imageOverlay('JK-EODMAP.png', bounds);
+      new L.Control.MiniMap(mini, {
+        toggleDisplay: true,
+        mapOptions: { crs: L.CRS.Simple },
+        zoomLevelFixed: fullZoom - 2
+      }).addTo(map);
+    });
       const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png',bounds).addTo(map);
       // Fit to show entire map
