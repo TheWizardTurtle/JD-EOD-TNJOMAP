@@ -161,7 +161,23 @@
         item.role = 'button';
         item.textContent = p.name;
         item.addEventListener('click', () => {
+          // Ensure marker is on the map before moving and pinging
+          if (!map.hasLayer(marker)) {
+            marker.addTo(map);
+          }
+          // Center on marker
           map.flyTo([p.y, p.x], 0, { duration: 0.7 });
+          // Open its popup
+          marker.openPopup();
+          // Pulse effect at correct position
+          setTimeout(() => {
+            const el = marker.getElement();
+            if (el) {
+              el.classList.add('ping');
+              setTimeout(() => el.classList.remove('ping'), 1000);
+            }
+          }, 300); // delay pulse until after map pans
+        });
           marker.openPopup();
           const el = marker.getElement();
           if (el) { el.classList.add('ping'); setTimeout(() => el.classList.remove('ping'), 1000); }
