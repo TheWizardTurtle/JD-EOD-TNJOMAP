@@ -10,24 +10,65 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
   <style>
     html, body { margin:0; height:100%; font-family:'Segoe UI',sans-serif; }
-    #sidebar { position:absolute; top:0; left:0; width:260px; height:100%; background:#111; color:#0ff; overflow-y:auto; padding:20px; box-shadow:2px 0 8px rgba(0,255,255,0.1); z-index:1000; transition: width .3s ease; }
-    #sidebar.collapsed { width:0; padding:0; overflow:hidden; box-shadow:none; }
-    #map { position:absolute; top:0; left:260px; width:calc(100% - 260px); height:100%; transition: left .3s ease, width .3s ease; z-index:500; }
+    #sidebar {
+      position:absolute; top:0; left:0;
+      width:260px; height:100%; background:#111; color:#0ff;
+      overflow-y:auto; padding:20px;
+      box-shadow:2px 0 8px rgba(0,255,255,0.1);
+      transition: width .3s ease;
+      z-index:1000;
+    }
+    #sidebar.collapsed {
+      width:0; padding:0; overflow:hidden; box-shadow:none;
+    }
+    #map {
+      position:absolute; top:0;
+      left:260px; width:calc(100% - 260px); height:100%;
+      transition: left .3s ease, width .3s ease;
+      z-index:500;
+    }
     #sidebar.collapsed + #map { left:0; width:100%; }
-    .control-btn { position:absolute; padding:8px 12px; background:#0ff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; box-shadow:0 0 10px rgba(0,255,255,0.4); z-index:1100; }
+    .control-btn {
+      position:absolute; padding:8px 12px;
+      background:#0ff; border:none; border-radius:6px;
+      cursor:pointer; font-weight:bold;
+      box-shadow:0 0 10px rgba(0,255,255,0.4);
+      z-index:1100;
+    }
     #hamburger{top:20px;left:20px;}#highContrastToggle{top:20px;left:70px;}#resetBtn{top:20px;right:20px;}#screenshotBtn{top:20px;right:100px;}
-    #searchBox{position:absolute;top:20px;left:300px;z-index:1001;background:rgba(0,0,0,0.8);padding:8px;border-radius:4px;box-shadow:0 0 6px rgba(0,255,255,0.5);}#searchInput{width:200px;padding:6px;font-size:14px;border-radius:4px;border:none;background:#222;color:#0ff;}
-    body.high-contrast{background:#fff;color:#000;}body.high-contrast #sidebar{background:#eee;color:#000;}body.high-contrast .control-btn{background:#000;color:#fff;}body.high-contrast .leaflet-popup-content-wrapper{background:#fff;color:#000;border-color:#000;}
-    @keyframes ripple{0%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}100%{transform:translate(-50%,-50%) scale(3);opacity:0;}} .ping{position:relative;} .ping::after{content:""; position:absolute; top:50%; left:50%; width:20px; height:20px; background-color:inherit; border-radius:50%; transform:translate(-50%,-50%); animation:ripple 1s forwards; opacity:0.6; z-index:-1;} .poi-item{padding:6px;cursor:pointer;}
+    #searchBox{
+      position:absolute; top:20px; left:300px; z-index:1001;
+      background:rgba(0,0,0,0.8); padding:8px; border-radius:4px;
+      box-shadow:0 0 6px rgba(0,255,255,0.5);
+    }
+    #searchInput{
+      width:200px; padding:6px; font-size:14px;
+      border-radius:4px; border:none;
+      background:#222; color:#0ff;
+    }
+    .poi-item { padding:6px; cursor:pointer; }
+    .ping::after {
+      content:""; position:absolute;
+      top:50%; left:50%; width:20px; height:20px;
+      background-color:inherit; border-radius:50%;
+      transform:translate(-50%,-50%);
+      animation:ripple 1s forwards; opacity:0.6;
+      z-index:-1;
+    }
+    @keyframes ripple {0%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}100%{transform:translate(-50%,-50%) scale(3);opacity:0;}}
   </style>
 </head>
 <body>
+  <!-- Controls -->
   <button id="hamburger" class="control-btn" aria-label="Toggle sidebar">☰</button>
   <button id="highContrastToggle" class="control-btn" aria-label="Toggle high contrast">⚙</button>
   <button id="resetBtn" class="control-btn" aria-label="Reset view">Reset</button>
   <button id="screenshotBtn" class="control-btn" aria-label="Screenshot">📷</button>
 
+  <!-- Search -->
   <div id="searchBox"><input id="searchInput" type="text" placeholder="Search POI..." aria-label="Search POIs"/></div>
+
+  <!-- Sidebar -->
   <div id="sidebar" role="navigation" aria-label="Points of Interest">
     <h2>Points of Interest</h2>
     <details id="combatDetail"><summary><strong>Combat Rooms</strong></summary><div id="combatRooms"></div></details>
@@ -35,18 +76,35 @@
     <details id="lectureDetail"><summary><strong>Lecture Rooms</strong></summary><div id="lectureRooms"></div></details>
     <div id="poiList"></div>
   </div>
+
+  <!-- Map -->
   <div id="map" role="application"></div>
 
+  <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script type="module">
+    // Debounce utility
     const debounce = (fn, delay = 200) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; };
-    const colorMap = { 'guardian quarters':'#3498db','consular quarters':'#2ecc71','sentinel quarters':'#1f8dd3','questioning room':'#e74c3c','jails':'#e74c3c','combat hall':'#1f8dd6','saber forge':'#ffffff','vip statues':'#ffd700','tg dojo #2':'#f1c40f','main tg dojo':'#f1c40f','archives':'#39ff14','lecture hall':'#00ff99','hangar teleport':'#888888','council room':'#ffd700','spawn':'#800000'};
-    const prefixMap = { 'combat room':'#1f8dd6','meditation chamber':'#90ee90','lecture room':'#006400' };
-    const getPinColor = name => { const k = name.toLowerCase(); if (colorMap[k]) return colorMap[k]; for (const p in prefixMap) if (k.startsWith(p)) return prefixMap[p]; return '#0ff'; };
 
-     const pois = [
+    // Color lookups
+    const colorMap = {
+      'guardian quarters':'#3498db','consular quarters':'#2ecc71','sentinel quarters':'#1f8dd6',
+      'questioning room':'#e74c3c','jails':'#e74c3c','combat hall':'#1f8dd6','saber forge':'#ffffff',
+      'vip statues':'#ffd700','tg dojo #2':'#f1c40f','main tg dojo':'#f1c40f','archives':'#39ff14',
+      'lecture hall':'#00ff99','hangar teleport':'#888888','council room':'#ffd700','spawn':'#800000'
+    };
+    const prefixMap = { 'combat room':'#1f8dd6','meditation chamber':'#90ee90','lecture room':'#006400' };
+    const getPinColor = name => {
+      const k = name.toLowerCase();
+      if (colorMap[k]) return colorMap[k];
+      for (const p in prefixMap) if (k.startsWith(p)) return prefixMap[p];
+      return '#0ff';
+    };
+
+    // Points of Interest
+    const pois = [
       // Static POIs
       { name: 'Sentinel Quarters', x: 3032, y: 6784 },
       { name: 'Trial Room', x: 304, y: 6304 },
@@ -119,31 +177,36 @@
       { name: 'Lecture Room 10', x: 3352, y: 6793 }
     ];
 
+
     let map, layers;
     function initMap() {
       map = L.map('map', { crs: L.CRS.Simple, minZoom: -2, maxZoom: 2 });
-      const bounds = [[0, 0], [7830, 8192]];
+      const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-      const startView = location.hash ? location.hash.slice(1).split(',').map(Number) : [7830/2, 8192/2, -2];
-      map.setView([startView[0], startView[1]], startView[2]);
-      map.on('moveend', () => { const c = map.getCenter(), z = map.getZoom(); location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`); });
-      layers = { combat: L.layerGroup(), meditation: L.layerGroup(), lecture: L.layerGroup(), others: L.layerGroup() };
+      const start = location.hash ? location.hash.slice(1).split(',').map(Number) : [7830/2,8192/2,-2];
+      map.setView([start[0], start[1]], start[2]);
+      map.on('moveend', () => {
+        const c = map.getCenter(), z = map.getZoom();
+        location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);
+      });
+      layers = {
+        combat: L.layerGroup(), meditation: L.layerGroup(), lecture: L.layerGroup(), others: L.layerGroup()
+      };
       // MiniMap
-      const miniLayer = L.imageOverlay('JK-EODMAP.png', bounds);
-      new L.Control.MiniMap(miniLayer, { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: -12 }).addTo(map);
+      const mini = L.imageOverlay('JK-EODMAP.png', bounds);
+      new L.Control.MiniMap(mini, { toggleDisplay:true, mapOptions:{ crs:L.CRS.Simple }, zoomLevelFixed:-12 }).addTo(map);
     }
 
     function createIcon(color) {
-      // Outer white ring + inner colored dot
       return L.divIcon({
         className: '',
         html: `
           <div style="position:relative;width:20px;height:20px;">
-            <div style="width:20px;height:20px;border-radius:50%;background:#fff;"></div>
+            <div style="width:20px;height:20px;border-radius:50%;background:#fff"></div>
             <div style="width:12px;height:12px;border-radius:50%;background:${color};position:absolute;top:4px;left:4px;box-shadow:0 0 6px ${color};"></div>
           </div>
         `,
-        iconSize: [20, 20]
+        iconSize: [20,20]
       });
     }
 
@@ -155,79 +218,49 @@
         others: document.getElementById('poiList')
       };
       Object.values(containers).forEach(c => c.innerHTML = '');
+
       pois.forEach(p => {
         const color = getPinColor(p.name);
         const icon = createIcon(color);
-        const marker = L.marker([p.y, p.x], { icon }).bindPopup(`<strong>${p.name}</strong>`);
+        const marker = L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);
         let grp = layers.others;
         if (p.name.toLowerCase().startsWith('combat room')) grp = layers.combat;
-        else if (p.name.toLowerCase().startsWith('meditation chamber')) grp = layers.meditation;
-        else if (p.name.toLowerCase().startsWith('lecture room')) grp = layers.lecture;
-        // attach to group but don't add
-        grp.addLayer(marker);
+        if (p.name.toLowerCase().startsWith('meditation chamber')) grp = layers.meditation;
+        if (p.name.toLowerCase().startsWith('lecture room')) grp = layers.lecture;
+        grp.addLayer(marker); // attach but do not add to map
 
+        // List item
         const item = document.createElement('div');
         item.className = 'poi-item';
         item.tabIndex = 0;
         item.role = 'button';
         item.textContent = p.name;
         item.addEventListener('click', () => {
-          // Show only this marker or category group
-          if (grp === layers.others) {
-            if (!map.hasLayer(marker)) marker.addTo(map);
-          } else {
-            if (!map.hasLayer(grp)) map.addLayer(grp);
-          }
-          // Pan to item
-          map.flyTo([p.y, p.x], 0, { duration: 0.7 });
-          marker.openPopup();
-          // Pulse at correct location
-          setTimeout(() => {
-            const el = marker.getElement();
-            if (el) {
-              el.classList.add('ping');
-              setTimeout(() => el.classList.remove('ping'), 1000);
-            }
-          }, 400);
-        });
+          // Show correct layer
+          if (grp === layers.others) map.addLayer(marker);
+          else map.addLayer(grp);
+          // Center and ping
+          map.flyTo([p.y,p.x], 0, {duration:0.7});
           marker.openPopup();
           setTimeout(() => {
             const el = marker.getElement();
-            if (el) { el.classList.add('ping'); setTimeout(() => el.classList.remove('ping'), 1000); }
+            if (el) { el.classList.add('ping'); setTimeout(() => el.classList.remove('ping'),1000); }
           }, 400);
         });
-        item.addEventListener('keydown', e => { if (e.key === 'Enter') item.click(); });
+        item.addEventListener('keydown', e => { if (e.key==='Enter') item.click(); });
 
-        if (grp === layers.combat) containers.combat.appendChild(item);
-        else if (grp === layers.meditation) containers.meditation.appendChild(item);
-        else if (grp === layers.lecture) containers.lecture.appendChild(item);
-        else containers.others.appendChild(item);
+        containers[grp===layers.combat?'combat':grp===layers.meditation?'meditation':grp===layers.lecture?'lecture':'others'].appendChild(item);
       });
-      // category toggle handlers
+
       ['combat','meditation','lecture'].forEach(cat => {
         document.getElementById(`${cat}Detail`).addEventListener('toggle', function() {
           if (this.open) {
             map.addLayer(layers[cat]);
-            // Immediately pulse without moving
+            // immediate ping without movement
             layers[cat].eachLayer(m => {
               const el = m.getElement();
-              if (el) {
-                el.classList.add('ping');
-                setTimeout(() => el.classList.remove('ping'), 1000);
-              }
+              if (el) { el.classList.add('ping'); setTimeout(() => el.classList.remove('ping'),1000); }
             });
-          } else {
-            map.removeLayer(layers[cat]);
-          }
-        });
-      });
-            }, 800);
-          } else {
-            map.removeLayer(layers[cat]);
-          }
-        });
-      });
-            }, 400);
           } else {
             map.removeLayer(layers[cat]);
           }
@@ -238,8 +271,8 @@
     function initControls() {
       document.getElementById('hamburger').onclick = () => document.getElementById('sidebar').classList.toggle('collapsed');
       document.getElementById('highContrastToggle').onclick = () => document.body.classList.toggle('high-contrast');
-      document.getElementById('resetBtn').onclick = () => map.setView([7830/2, 8192/2], -2);
-      document.getElementById('screenshotBtn').onclick = () => html2canvas(document.getElementById('map')).then(canvas => { const a = document.createElement('a'); a.download = 'map.png'; a.href = canvas.toDataURL(); a.click(); });
+      document.getElementById('resetBtn').onclick = () => map.setView([7830/2,8192/2],-2);
+      document.getElementById('screenshotBtn').onclick = () => html2canvas(document.getElementById('map')).then(canvas => { const a=document.createElement('a'); a.download='map.png'; a.href=canvas.toDataURL(); a.click(); });
     }
 
     function initSearch() {
@@ -249,14 +282,11 @@
           const nm = m.getPopup().getContent().toLowerCase();
           if (term && nm.includes(term) && !map.hasLayer(m)) map.addLayer(m);
         }));
-      }), 200);
+      }),200);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      initMap();
-      initSidebarAndMarkers();
-      initControls();
-      initSearch();
+      initMap(); initSidebarAndMarkers(); initControls(); initSearch();
     });
   </script>
 </body>
