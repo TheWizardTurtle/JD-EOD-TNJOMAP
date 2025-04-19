@@ -47,15 +47,125 @@
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script>
     // Full POI data
-    const pois = [ /* full POIs as before */ ];
-    const colorMap = { /* your custom colorMap */ };
+    const pois = [
+      { name: 'Sentinel Quarters', x: 3032, y: 6784 },
+      { name: 'Trial Room', x: 304, y: 6304 },
+      { name: 'Jails', x: 1176, y: 4448 },
+      { name: 'Questioning Room', x: 2056, y: 5164 },
+      { name: 'JAF Dojo', x: 2768, y: 5564 },
+      { name: 'Cantina', x: 4484, y: 5832 },
+      { name: 'Main TG Dojo', x: 6160, y: 5380 },
+      { name: 'Archives', x: 6996, y: 4376 },
+      { name: 'Combat Hall', x: 4372, y: 4360 },
+      { name: 'Lecture Hall', x: 5992, y: 4376 },
+      { name: 'Spawn', x: 3676, y: 1960 },
+      { name: 'Council Room', x: 3684, y: 1056 },
+      { name: 'Hangar Teleport', x: 7112, y: 1268 },
+      { name: 'TG Dojo #2', x: 6928, y: 2252 },
+      { name: 'Guardian Quarters', x: 1780, y: 1984 },
+      { name: 'Consular Quarters', x: 6968, y: 3476 },
+      { name: 'Saber Forge', x: 5292, y: 2696 },
+      { name: 'VIP Statues', x: 5296, y: 600 },
+      { name: 'Combat Room 1', x: 5588, y: 1152 },
+      { name: 'Combat Room 2', x: 5576, y: 1388 },
+      { name: 'Combat Room 3', x: 5088, y: 1160 },
+      { name: 'Combat Room 4', x: 5092, y: 1396 },
+      { name: 'Combat Room 5', x: 3560, y: 2448 },
+      { name: 'Combat Room 6', x: 3792, y: 2448 },
+      { name: 'Combat Room 7', x: 2824, y: 2616 },
+      { name: 'Combat Room 8', x: 1924, y: 2744 },
+      { name: 'Combat Room 9', x: 1620, y: 2748 },
+      { name: 'Combat Room 10', x: 2388, y: 1628 },
+      { name: 'Combat Room 11', x: 2312, y: 1352 },
+      { name: 'Combat Room 12', x: 1176, y: 1856 },
+      { name: 'Combat Room 13', x: 948, y: 1620 },
+      { name: 'Combat Room 14', x: 1412, y: 1372 },
+      { name: 'Combat Room 15', x: 1552, y: 7732 },
+      { name: 'Combat Room 16', x: 1764, y: 7644 },
+      { name: 'Combat Room 17', x: 1540, y: 7500 },
+      { name: 'Combat Room 18', x: 4176, y: 4796 },
+      { name: 'Combat Room 19', x: 4512, y: 4788 },
+      { name: 'Combat Room 20', x: 4804, y: 4792 },
+      { name: 'Combat Room 21', x: 4196, y: 3920 },
+      { name: 'Combat Room 22', x: 4508, y: 3924 },
+      { name: 'Combat Room 23', x: 4808, y: 3904 },
+      { name: 'Meditation Chamber 1', x: 6608, y: 2508 },
+      { name: 'Meditation Chamber 2', x: 6608, y: 2358 },
+      { name: 'Meditation Chamber 3', x: 6622, y: 2072 },
+      { name: 'Meditation Chamber 4', x: 6608, y: 1926 },
+      { name: 'Meditation Chamber 5', x: 6174, y: 1400 },
+      { name: 'Meditation Chamber 6', x: 6162, y: 1166 },
+      { name: 'Meditation Chamber 7', x: 4510, y: 1164 },
+      { name: 'Meditation Chamber 8', x: 4524, y: 1394 },
+      { name: 'Meditation Chamber 9', x: 3562, y: 1608 },
+      { name: 'Meditation Chamber 10', x: 3794, y: 1606 },
+      { name: 'Meditation Chamber 11', x: 3814, y: 2970 },
+      { name: 'Meditation Chamber 13', x: 6796, y: 4720 },
+      { name: 'Meditation Chamber 14', x: 7156, y: 4716 },
+      { name: 'Meditation Chamber 15', x: 7152, y: 4044 },
+      { name: 'Lecture Room 1', x: 6606, y: 1710 },
+      { name: 'Lecture Room 2', x: 6836, y: 1452 },
+      { name: 'Lecture Room 3', x: 4904, y: 1408 },
+      { name: 'Lecture Room 4', x: 4754, y: 1142 },
+      { name: 'Lecture Room 5', x: 5876, y: 4640 },
+      { name: 'Lecture Room 6', x: 6132, y: 4624 },
+      { name: 'Lecture Room 7', x: 5884, y: 4092 },
+      { name: 'Lecture Room 8', x: 6136, y: 4096 },
+      { name: 'Lecture Room 9', x: 1772, y: 1016 },
+      { name: 'Lecture Room 10', x: 3352, y: 6793 }
+    ];
+
+    const colorMap = {
+      'Sentinel Quarters': '#f1c40f',
+      'Trial Room': '#d4a017',
+      'Jails': '#e74c3c',
+      'Questioning Room': '#e74c3c',
+      'JAF Dojo': '#5dade2',
+      'Cantina': '#0ff',
+      'Main TG Dojo': '#f1c40f',
+      'TG Dojo #2': '#f1c40f',
+      'Archives': '#39ff14',
+      'Combat Hall': '#1f75fe',
+      'Lecture Hall': '#adff2f',
+      'Consular Quarters': '#2ecc71',
+      'Spawn': '#800000',
+      'Council Room': '#ffd700',
+      'Hangar Teleport': '#888888',
+      'VIP Statues': '#d4af37',
+      'Saber Forge': '#ffffff'
+    };
+
     const prefixMap = { 'Combat Room':'#1f8dd6','Meditation Chamber':'#90ee90','Lecture Room':'#006400' };
     function getColor(name) {
       return colorMap[name] || Object.entries(prefixMap).find(([k])=>name.startsWith(k))?.[1] || '#0ff';
     }
     let map, layers, currentMarker;
     function initMap() {
-      map = L.map('map',{crs:L.CRS.Simple,zoomControl:true});
+      // Initialize the map with Simple CRS
+      map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
+      const bounds = [[0, 0], [7830, 8192]];
+      // Add overlay image
+      L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+      // After the map and image are fully loaded, fit to bounds once
+      map.on('load', () => {
+        map.fitBounds(bounds, { animate: false });
+        map.setMaxBounds(bounds);
+      });
+      // Trigger the load event by invalidating size
+      map.invalidateSize();
+      // Create layer groups
+      layers = {
+        combat: L.layerGroup().addTo(map),
+        meditation: L.layerGroup().addTo(map),
+        lecture: L.layerGroup().addTo(map),
+        others: L.layerGroup().addTo(map)
+      };
+      // MiniMap control
+      new L.Control.MiniMap(
+        L.imageOverlay('JK-EODMAP.png', bounds),
+        { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: map.getZoom() - 2 }
+      ).addTo(map);
+    });
       const bounds=[[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png',bounds).addTo(map);
       // Fit to full extent immediately
