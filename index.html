@@ -24,6 +24,22 @@
     #combatDetail summary { color:#1f8dd6; }
     #meditationDetail summary { color:#228b22; }
     #lectureDetail summary { color:#adff2f; }
+
+    /* Remove default summary marker box */
+    #sidebar summary { background: none; color: inherit; padding: 4px 0; }
+    #sidebar summary::-webkit-details-marker { display: none; }
+    #sidebar summary::marker { font-size: 0; }
+
+    /* Sidebar list coloring by category */
+    #combatRooms .poi-item { color: #1f8dd6; }
+    #meditationChambers .poi-item { color: #228b22; }
+    #lectureRooms .poi-item { color: #adff2f; }
+    #poiList .poi-item { color: #0ff; }
+
+    /* POI list items */
+    .poi-item { padding:6px; cursor:pointer; }
+    #meditationDetail summary { color:#228b22; }
+    #lectureDetail summary { color:#adff2f; }
     /* POI list items */
     .poi-item { padding:6px; cursor:pointer; }
     .poi-item.sentinel { color:#f1c40f; }
