@@ -151,6 +151,8 @@
         lecture: document.getElementById('lectureRooms'),
         others: document.getElementById('poiList')
       };
+      // Clear any existing list items
+      Object.values(containers).forEach(c => c.innerHTML = '');
 
       pois.forEach(p => {
         const color = getColor(p.name);
