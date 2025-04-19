@@ -72,12 +72,10 @@
       'Archives':'#39ff14','Combat Hall':'#1f75fe','Lecture Hall':'#adff2f','Consular Quarters':'#2ecc71',
       'Spawn':'#800000','Council Room':'#ffd700','Hangar Teleport':'#888888','VIP Statues':'#d4af37','Saber Forge':'#ffffff'
     };
-    function getColor(name) {
-      return colorMap[name] || Object.entries(prefixMap).find(([k])=>name.startsWith(k))?.[1] || '#0ff';
-    }
+    function getColor(name) { return colorMap[name] || Object.entries(prefixMap).find(([k])=>name.startsWith(k))?.[1] || '#0ff'; }
 
     // POI data
-    const pois = [
+const pois = [
       { name: 'Sentinel Quarters', x: 3032, y: 6784 },
       { name: 'Trial Room', x: 304, y: 6304 },
       { name: 'Jails', x: 1176, y: 4448 },
@@ -145,8 +143,7 @@
       { name: 'Lecture Room 10', x: 3352, y: 6793 }
     ];
 
-
-    // Sidebar logic
+    // Setup sidebar containers
     const containers = {
       combat: document.getElementById('combatRooms'),
       meditation: document.getElementById('meditationChambers'),
@@ -155,17 +152,24 @@
     };
     Object.values(containers).forEach(c => c.innerHTML = '');
 
+    // Track current marker and category groups
     let currentMarker = null;
+    const markersByCategory = { combat: [], meditation: [], lecture: [] };
+
+    // Populate sidebar and markers
     pois.forEach(p => {
       if (p.name === 'Holocron Vault') return;
       const color = getColor(p.name);
       const icon = L.divIcon({ html: `<div style="width:16px;height:16px;border-radius:50%;background:${color}"></div>`, iconSize:[16,16] });
       const marker = L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);
+      // Determine category
       let cat = 'others';
       if (p.name.startsWith('Combat Room')) cat = 'combat';
       else if (p.name.startsWith('Meditation Chamber')) cat = 'meditation';
       else if (p.name.startsWith('Lecture Room')) cat = 'lecture';
-
+      // Store marker for category toggling
+      if (cat !== 'others') markersByCategory[cat].push({ marker, color });
+      // Create sidebar entry
       const li = document.createElement('li');
       li.textContent = p.name;
       li.className = 'poi-item';
@@ -184,6 +188,25 @@
         }
       };
       containers[cat].appendChild(li);
+    });
+
+    // Category expand pulses
+    ['combat','meditation','lecture'].forEach(cat => {
+      document.getElementById(cat + 'Detail').addEventListener('toggle', function() {
+        markersByCategory[cat].forEach(obj => {
+          if (this.open) {
+            map.addLayer(obj.marker);
+            const el = obj.marker.getElement();
+            if (el) {
+              const ping = document.createElement('div'); ping.className = 'radar'; ping.style.background = obj.color;
+              el.appendChild(ping);
+              setTimeout(() => el.removeChild(ping),1000);
+            }
+          } else {
+            map.removeLayer(obj.marker);
+          }
+        });
+      });
     });
   });
 </script>
