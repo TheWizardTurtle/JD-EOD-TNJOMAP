@@ -9,50 +9,39 @@
   <!-- MiniMap CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
   <style>
-    /* Global */
-    html, body { margin:0; height:100%; font-family:'Segoe UI',sans-serif; background:#0d0d0d; }
-    /* Controls */
-    .control-btn { position:absolute; padding:8px 12px; background:#0ff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; box-shadow:0 0 10px rgba(0,255,255,0.4); z-index:1100; }
-    #hamburger { top:10px; left:10px; }
-    #highContrastToggle { top:10px; left:60px; }
-    #resetBtn { top:10px; right:20px; }
-    #screenshotBtn { top:10px; right:80px; }
-    /* Search box */
-    #searchBox { position:absolute; top:10px; left:140px; z-index:1100; background:rgba(0,0,0,0.8); padding:8px; border-radius:4px; box-shadow:0 0 6px rgba(0,255,255,0.5); }
-    #searchInput { width:200px; padding:6px; font-size:14px; border-radius:4px; border:none; background:#222; color:#0ff; }
-    /* Sidebar */
-    #sidebar { position:absolute; top:60px; left:0; width:260px; height:calc(100% - 60px); background:#111; color:#0ff; overflow-y:visible; padding:20px; box-shadow:2px 0 8px rgba(0,255,255,0.1); transition: width .3s ease; z-index:1000; }
-    #sidebar.collapsed { width:0; padding:0; overflow:hidden; box-shadow:none; background:transparent; }
-    #sidebar h2 { text-align:center; margin:0 0 10px; font-size:1.6em; font-weight:900; text-transform:uppercase; color:#0ff; border-bottom:2px solid #0ff; padding-bottom:6px; text-shadow:1px 1px 2px rgba(0,0,0,0.5); }
-    details summary { list-style:none; cursor:pointer; margin:8px 0; font-size:1.1em; font-weight:700; text-align:center; }
-    #combatDetail summary { color:#1f8dd6; }
-    #meditationDetail summary { color:#228b22; }
-    #lectureDetail summary { color:#adff2f; }
-    summary::-webkit-details-marker { display:none; }
-    summary::marker { font-size:0; }
-    .poi-list { list-style:none; padding:0; margin:0 0 10px; }
-    .poi-item { padding:6px; cursor:pointer; font-weight:600; text-shadow:1px 1px 2px rgba(0,0,0,0.5); margin:4px 0; text-align:center; }
-    .sidebar-sep { border:none; border-top:1px solid #555; margin:6px 0; }
-    /* Map */
-    #map { position:absolute; top:0; left:260px; width:calc(100% - 260px); height:100%; transition:left .3s ease,width .3s ease; z-index:500; }
-    /* Animations */
-    .radar { position:absolute; border-radius:50%; animation:radar 1.5s linear infinite; opacity:0.6; z-index:499; }
-    @keyframes radar {0%{transform:scale(0.5);opacity:0.6;}100%{transform:scale(3);opacity:0;}}
-    .ping::after { content:''; position:absolute; top:50%; left:50%; width:12px; height:12px; background-color:inherit; border-radius:50%; transform:translate(-50%,-50%); animation:ripple 1s forwards; opacity:0.6; z-index:-1; }
-    @keyframes ripple {0%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}100%{transform:translate(-50%,-50%) scale(3);opacity:0;}}
+    html, body { margin: 0; height: 100%; background: #0d0d0d; font-family: 'Segoe UI', sans-serif; }
+    .control-btn { position: absolute; padding: 8px 12px; background: #0ff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; box-shadow: 0 0 10px rgba(0,255,255,0.4); z-index: 1100; }
+    #hamburger { top: 10px; left: 10px; }
+    #highContrastToggle { top: 10px; left: 60px; }
+    #resetBtn { top: 10px; right: 20px; }
+    #screenshotBtn { top: 10px; right: 80px; }
+    #searchBox { position: absolute; top: 10px; left: 140px; z-index: 1100; background: rgba(0,0,0,0.8); padding: 8px; border-radius: 4px; box-shadow: 0 0 6px rgba(0,255,255,0.5); }
+    #searchInput { width: 200px; padding: 6px; font-size: 14px; border-radius: 4px; border: none; background: #222; color: #0ff; }
+    #sidebar { position: absolute; top: 60px; left: 0; width: 260px; height: calc(100% - 60px); background: #111; color: #0ff; overflow-y: visible; padding: 20px; box-shadow: 2px 0 8px rgba(0,255,255,0.1); z-index: 1000; transition: width .3s; }
+    #sidebar.collapsed { width: 0; padding: 0; overflow: hidden; background: transparent; }
+    #sidebar h2 { text-align: center; margin: 0 0 10px; font-size: 1.6em; font-weight: 900; text-transform: uppercase; color: #0ff; border-bottom: 2px solid #0ff; padding-bottom: 6px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+    details summary { list-style: none; cursor: pointer; margin: 8px 0 4px; font-size: 1.1em; font-weight: 700; text-align: center; }
+    #combatDetail summary { color: #1f8dd6; }
+    #meditationDetail summary { color: #228b22; }
+    #lectureDetail summary { color: #adff2f; }
+    summary::-webkit-details-marker { display: none; }
+    summary::marker { font-size: 0; }
+    .poi-list { list-style: none; padding: 0; margin: 0 0 10px; }
+    .poi-item { padding: 6px; margin: 4px 0; text-align: center; font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); cursor: pointer; }
+    .sidebar-sep { border: none; border-top: 1px solid #555; margin: 6px 0; }
+    #map { position: absolute; top: 0; left: 260px; width: calc(100% - 260px); height: 100%; transition: left .3s, width .3s; z-index: 500; }
+    .radar { position: absolute; border-radius: 50%; animation: radar 1.5s linear infinite; opacity: 0.6; z-index: 499; }
+    @keyframes radar { 0% { transform: scale(0.5); opacity: 0.6; } 100% { transform: scale(3); opacity: 0; } }
+    .ping::after { content: ''; position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background-color: inherit; border-radius: 50%; transform: translate(-50%, -50%); animation: ripple 1s forwards; opacity: 0.6; z-index: -1; }
+    @keyframes ripple { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; } 100% { transform: translate(-50%, -50%) scale(3); opacity: 0; } }
   </style>
 </head>
 <body>
-  <!-- Controls -->
   <button id="hamburger" class="control-btn">☰</button>
   <button id="highContrastToggle" class="control-btn">⚙</button>
   <button id="resetBtn" class="control-btn">Reset</button>
   <button id="screenshotBtn" class="control-btn">📷</button>
-
-  <!-- Search -->
   <div id="searchBox"><input id="searchInput" placeholder="Search POI..."/></div>
-
-  <!-- Sidebar -->
   <div id="sidebar">
     <h2>Points of Interest</h2>
     <details id="combatDetail"><summary>Combat Rooms</summary><ul id="combatRooms" class="poi-list"></ul></details>
@@ -63,23 +52,21 @@
     <hr class="sidebar-sep" />
     <ul id="poiList" class="poi-list"></ul>
   </div>
-
-  <!-- Map -->
   <div id="map"></div>
-
-  <!-- Scripts -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script type="module">
-    const debounce=(fn,delay=200)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),delay);}};
-    $1'lecture hall':'#adff2f',
+    const debounce = (fn, delay=200) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; };
+    const colorMap = {
+      'sentinel quarters':'#f1c40f','trial room':'#d4a017','jails':'#e74c3c','questioning room':'#e74c3c',
+      'jaf dojo':'#5dade2','cantina':'#0ff','archives':'#39ff14','combat hall':'#1f75fe','lecture hall':'#adff2f',
       'spawn':'#800000','council room':'#ffd700','hangar teleport':'#888888','tg dojo #2':'#f1c40f','main tg dojo':'#f1c40f',
       'holocron vault':'#39ff14','consular quarters':'#2ecc71','saber forge':'#ffffff','vip statues':'#d4af37'
     };
-    const prefixMap={'combat room':'#1f8dd6','meditation chamber':'#90ee90','lecture room':'#006400'};
-    const getPinColor=name=>{const k=name.toLowerCase();return colorMap[k]||Object.entries(prefixMap).find(([p])=>k.startsWith(p))?.[1]||'#0ff';};
-    const pois = [
+    const prefixMap = {'combat room':'#1f8dd6','meditation chamber':'#90ee90','lecture room':'#006400'};
+    const getPinColor = name => { const k=name.toLowerCase(); return colorMap[k]||Object.entries(prefixMap).find(([p])=>k.startsWith(p))?.[1]||'#0ff'; };
+     const pois = [
       // Static POIs
       { name: 'Sentinel Quarters', x: 3032, y: 6784 },
       { name: 'Trial Room', x: 304, y: 6304 },
@@ -152,23 +139,5 @@
       { name: 'Lecture Room 10', x: 3352, y: 6793 }
     ];
     let map,layers,currentMarker=null;
-    function initMap(){map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});const b=[[0,0],[7830,8192]];L.imageOverlay('JK-EODMAP.png',b).addTo(map);const s=location.hash?location.hash.slice(1).split(',').map(Number):[7830/2,8192/2,-2];map.setView([s[0],s[1]],s[2]);map.on('moveend',()=>{const c=map.getCenter(),z=map.getZoom();location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);});layers={combat:L.layerGroup(),meditation:L.layerGroup(),lecture:L.layerGroup(),others:L.layerGroup()};const mini=L.imageOverlay('JK-EODMAP.png',b);new L.Control.MiniMap(mini,{toggleDisplay:true,mapOptions:{crs:L.CRS.Simple},zoomLevelFixed:-12}).addTo(map);}    
-    function createIcon(color){return L.divIcon({className:'',html:`<div style="position:relative;width:20px;height:20px;">`+`<div style="width:20px;height:20px;border-radius:50%;background:#fff"></div>`+`<div style="width:12px;height:12px;border-radius:50%;background:${color};position:absolute;top:4px;left:4px;box-shadow:0 0 6px ${color};"></div>`+`</div>`,iconSize:[20,20]});}
-    function initSidebarAndMarkers(){const cont={combat:document.getElementById('combatRooms'),meditation:document.getElementById('meditationChambers'),lecture:document.getElementById('lectureRooms'),others:document.getElementById('poiList')};Object.values(cont).forEach(c=>c.innerHTML='');pois.forEach(p=>{const col=getPinColor(p.name),icon=createIcon(col),marker=L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);let grp=layers.others;if(p.name.toLowerCase().startsWith('combat room'))grp=layers.combat;if(p.name.toLowerCase().startsWith('meditation chamber'))grp=layers.meditation;if(p.name.toLowerCase().startsWith('lecture room'))grp=layers.lecture;grp.addLayer(marker);const item=document.createElement('li');item.className='poi-item';item.textContent=p.name;item.style.color=col;item.onclick=()=>{if(currentMarker&&currentMarker!==marker)map.removeLayer(currentMarker);if(!map.hasLayer(marker))map.addLayer(marker);currentMarker=marker;map.flyTo([p.y,p.x],map.getZoom(),{duration:1});marker.openPopup();const el=marker.getElement();if(el){el.classList.add('ping');setTimeout(()=>el.classList.remove('ping'),1000);const radar=document.createElement('div');radar.className='radar';radar.style.background=col;el.appendChild(radar);setTimeout(()=>el.removeChild(radar),1500);} };cont[grp===layers.combat?'combat':grp===layers.meditation?'meditation':grp===layers.lecture?'lecture':'others'].appendChild(item);});      // Reorder static 'other' POIs by color groups
-      const otherContainer = document.getElementById('poiList');
-      const items = Array.from(otherContainer.children);
-      otherContainer.innerHTML = '';
-      const groups = { green:['archives','consular','holocronvault','lecturehall'], red:['jails','questioning'], yellow:['sentinel','trial','tgdojo','council','vip'] };
-      const whiteGray = ['saber','hangar'];
-      const appendGroup = list => list.forEach(cls=> items.filter(el=>el.classList.contains(cls)).forEach(el=>otherContainer.appendChild(el)));
-      appendGroup(groups.green);
-      appendGroup(groups.red);
-      appendGroup(groups.yellow);
-      items.filter(el=> ![...groups.green,...groups.red,...groups.yellow,...whiteGray].some(cls=>el.classList.contains(cls))).forEach(el=>otherContainer.appendChild(el));
-      appendGroup(whiteGray);
-      ['combat','meditation','lecture'].forEach(cat=>{document.getElementById(`${cat}Detail`).addEventListener('toggle',function(){this.open?map.addLayer(layers[cat]):map.removeLayer(layers[cat]);if(this.open)layers[cat].eachLayer(m=>{const el=m.getElement();if(el){el.classList.add('ping');setTimeout(()=>el.classList.remove('ping'),1000);const radar=document.createElement('div');radar.className='radar';radar.style.background=getPinColor(m.getPopup().getContent());el.appendChild(radar);setTimeout(()=>el.removeChild(radar),1500);} });});});}
-    function initControls(){document.getElementById('hamburger').onclick=()=>document.getElementById('sidebar').classList.toggle('collapsed');document.getElementById('highContrastToggle').onclick=()=>document.body.classList.toggle('high-contrast');document.getElementById('resetBtn').onclick=()=>map.setView([7830/2,8192/2],-2);document.getElementById('screenshotBtn').onclick=()=>html2canvas(document.getElementById('map')).then(canvas=>{const a=document.createElement('a');a.download='map.png';a.href=canvas.toDataURL();a.click();});}
-    function initSearch(){document.getElementById('searchInput').addEventListener('input',debounce(e=>{const t=e.target.value.toLowerCase();Object.values(layers).forEach(grp=>grp.eachLayer(m=>{const nm=m.getPopup().getContent().toLowerCase();if(t&&nm.includes(t)&&!map.hasLayer(m))map.addLayer(m);}));}),200);}document.addEventListener('DOMContentLoaded',()=>{initMap();initSidebarAndMarkers();initControls();initSearch();});
-  </script>
-</body>
-</html>
+    function initMap(){ map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2}); const bounds=[[0,0],[7830,8192]]; L.imageOverlay('JK-EODMAP.png',bounds).addTo(map); const start=location.hash?location.hash.slice(1).split(',').map(Number):[7830/2,8192/2,-2]; map.setView([start[0],start[1]],start[2]); map.on('moveend',()=>{const c=map.getCenter(),z=map.getZoom();location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);}); layers={combat:L.layerGroup(),meditation:L.layerGroup(),lecture:L.layerGroup(),others:L.layerGroup()}; const mini=L.imageOverlay('JK-EODMAP.png',bounds); new L.Control.MiniMap(mini,{toggleDisplay:true,mapOptions:{crs:L.CRS.Simple},zoomLevelFixed:-12}).addTo(map);}    
+    function createIcon(color){ return L.divIcon({className:'',html:`<div style="position:relative;width:20px;height:20px;">`+`<div style="width:20px;height:20px;border-radius:50%;background:#fff"></div>`+
