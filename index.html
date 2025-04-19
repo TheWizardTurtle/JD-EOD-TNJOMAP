@@ -30,7 +30,18 @@
     ul.poi-list { list-style:none; padding:0; margin:0 0 10px; }
     ul.poi-list li { padding:6px; margin:4px 0; text-align:center; cursor:pointer; font-weight:600; }
     .sidebar-sep { border-top:1px solid #555; margin:6px 0; }
-    #map {$1/* remove transition to avoid jitter */ }
+    #map {
+      position:absolute;
+      top:0;
+      left:260px;
+      right:0;
+      bottom:0;
+      z-index:500;
+    }
+    #sidebar.collapsed ~ #map {
+      left:0;
+      width:100%;
+    }
 #sidebar.collapsed ~ #map { left:0; width:100%; }
     @keyframes radar { 0% { transform:scale(1); opacity:0.7; } 100% { transform:scale(3); opacity:0; } }
     .radar { position:absolute; width:16px; height:16px; top:50%; left:50%; transform:translate(-50%, -50%); border-radius:50%; animation:radar 3s ease-out infinite; pointer-events:none; z-index:1000; }
