@@ -67,6 +67,8 @@
       const initZoom = map.getZoom();
       map.setMinZoom(initZoom - 3);
       map.setMaxBounds(bounds);
+      // Zoom out fully to show entire map by default
+      map.setZoom(map.getMinZoom());
       // Minimap fully zoomed out
       new L.Control.MiniMap(
         L.imageOverlay('JK-EODMAP.png', bounds),
