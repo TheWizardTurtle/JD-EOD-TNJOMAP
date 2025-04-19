@@ -24,7 +24,7 @@
     .sidebar-sep{border-top:1px solid #555;margin:6px 0;}
     #map{position:absolute;top:0;left:260px;right:0;bottom:0;z-index:500;}
     @keyframes radar {0%{transform:scale(1);opacity:0.7;}100%{transform:scale(3);opacity:0;}}
-    .radar { position:absolute; width:16px; height:16px; top:50%; left:50%; transform:translate(-50%,-50%); border-radius:50%; animation:radar 1s ease-out; pointer-events:none; }
+    .radar { position:absolute; width:16px; height:16px; top:50%; left:50%; transform:translate(-50%,-50%); border-radius:50%; animation:radar 3s ease-out infinite; pointer-events:none; }
   </style>
 </head>
 <body>
@@ -47,35 +47,25 @@
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', function() {
-    // Initialize map
-    const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
-    const bounds = [[0,0],[7830,8192]];
-    L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-    map.fitBounds(bounds, { animate: false });
-    const fullZoom = map.getZoom();
-    map.setMinZoom(fullZoom - 4);
-    map.setMaxBounds(bounds);
-    new L.Control.MiniMap(
-      L.imageOverlay('JK-EODMAP.png', bounds),
-      { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: fullZoom - 2 }
-    ).addTo(map);
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
+      const bounds = [[0,0],[7830,8192]];
+      L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+      map.fitBounds(bounds, { animate: false });
+      const fullZoom = map.getZoom(); map.setMinZoom(fullZoom - 4); map.setMaxBounds(bounds);
+      new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds), { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: fullZoom - 2 }).addTo(map);
 
-    // Color logic
-    const prefixMap = { 'Combat Room': '#1f8dd6', 'Meditation Chamber': '#90ee90', 'Lecture Room': '#006400' };
-    const colorMap = {
+      const prefixMap = { 'Combat Room': '#1f8dd6', 'Meditation Chamber': '#90ee90', 'Lecture Room': '#006400' };
+      const colorMap = {
       'Sentinel Quarters':'#f1c40f','Trial Room':'#d4a017','Jails':'#e74c3c','Questioning Room':'#e74c3c',
       'JAF Dojo':'#5dade2','Cantina':'#0ff','Main TG Dojo':'#f1c40f','TG Dojo #2':'#f1c40f',
       'Archives':'#39ff14','Combat Hall':'#1f75fe','Lecture Hall':'#adff2f','Consular Quarters':'#2ecc71',
       'Spawn':'#800000','Council Room':'#ffd700','Hangar Teleport':'#888888','VIP Statues':'#d4af37','Saber Forge':'#ffffff'
     };
-    function getColor(name) { return colorMap[name] || Object.entries(prefixMap).find(([k])=>name.startsWith(k))?.[1] || '#0ff'; }
+      const getColor = name => colorMap[name] || Object.entries(prefixMap).find(([k])=>name.startsWith(k))?.[1] || '#0ff';
 
-    // POI data
-const pois = [
+     const pois = [
       { name: 'Sentinel Quarters', x: 3032, y: 6784 },
       { name: 'Trial Room', x: 304, y: 6304 },
       { name: 'Jails', x: 1176, y: 4448 },
@@ -143,72 +133,40 @@ const pois = [
       { name: 'Lecture Room 10', x: 3352, y: 6793 }
     ];
 
-    // Setup sidebar containers
-    const containers = {
-      combat: document.getElementById('combatRooms'),
-      meditation: document.getElementById('meditationChambers'),
-      lecture: document.getElementById('lectureRooms'),
-      others: document.getElementById('poiList')
-    };
-    Object.values(containers).forEach(c => c.innerHTML = '');
+      const containers = { combat: document.getElementById('combatRooms'), meditation: document.getElementById('meditationChambers'), lecture: document.getElementById('lectureRooms'), others: document.getElementById('poiList') };
+      Object.values(containers).forEach(c=>c.innerHTML='');
+      let currentMarker = null;
+      const markersByCategory = { combat: [], meditation: [], lecture: [] };
+      const order = ['Sentinel Quarters','Guardian Quarters','Consular Quarters','Main TG Dojo','TG Dojo #2','Trial Room','VIP Statues','Council Room','JAF Dojo','Combat Hall','Cantina','Lecture Hall','Archives','Saber Forge','Spawn','Questioning Room','Jails','Hangar Teleport'];
 
-    // Track current marker and category groups
-    let currentMarker = null;
-    const markersByCategory = { combat: [], meditation: [], lecture: [] };
+      pois.forEach(p => {
+        if(p.name==='Holocron Vault') return;
+        const color = getColor(p.name);
+        const iconHtml = `<div style="width:14px;height:14px;border-radius:50%;background:${color}"></div><div class="radar" style="background:${color}"></div>`;
+        const icon = L.divIcon({ html: iconHtml, iconSize:[20,20], className:'' });
+        const marker = L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);
+        let cat='others'; if(p.name.startsWith('Combat Room'))cat='combat'; else if(p.name.startsWith('Meditation Chamber'))cat='meditation'; else if(p.name.startsWith('Lecture Room'))cat='lecture';
+        if(cat!=='others') markersByCategory[cat].push(marker);
 
-    // Populate sidebar and markers
-    pois.forEach(p => {
-      if (p.name === 'Holocron Vault') return;
-      const color = getColor(p.name);
-      const icon = L.divIcon({ html: `<div style="width:16px;height:16px;border-radius:50%;background:${color}"></div>`, iconSize:[16,16] });
-      const marker = L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);
-      // Determine category
-      let cat = 'others';
-      if (p.name.startsWith('Combat Room')) cat = 'combat';
-      else if (p.name.startsWith('Meditation Chamber')) cat = 'meditation';
-      else if (p.name.startsWith('Lecture Room')) cat = 'lecture';
-      // Store marker for category toggling
-      if (cat !== 'others') markersByCategory[cat].push({ marker, color });
-      // Create sidebar entry
-      const li = document.createElement('li');
-      li.textContent = p.name;
-      li.className = 'poi-item';
-      li.style.color = color;
-      li.onclick = () => {
-        if (currentMarker) map.removeLayer(currentMarker);
-        map.addLayer(marker);
-        currentMarker = marker;
-        marker.openPopup();
-        map.flyTo([p.y,p.x], map.getZoom(), { duration:1 });
-        const el = marker.getElement();
-        if (el) {
-          const ping = document.createElement('div'); ping.className = 'radar'; ping.style.background = color;
-          el.appendChild(ping);
-          setTimeout(() => el.removeChild(ping),1000);
-        }
-      };
-      containers[cat].appendChild(li);
-    });
+        const li = document.createElement('li'); li.textContent=p.name; li.className='poi-item'; li.style.color=color;
+        li.onclick = () => {
+          if(currentMarker) map.removeLayer(currentMarker);
+          map.addLayer(marker); currentMarker=marker; marker.openPopup(); map.flyTo([p.y,p.x],map.getZoom(),{duration:1});
+        };
+        containers[cat].appendChild(li);
+      });
+      // reorder others
+      const ul=containers.others, items=Array.from(ul.children); ul.innerHTML=''; order.forEach(name=>{ const it=items.find(li=>li.textContent===name); if(it)ul.appendChild(it); });
 
-    // Category expand pulses
-    ['combat','meditation','lecture'].forEach(cat => {
-      document.getElementById(cat + 'Detail').addEventListener('toggle', function() {
-        markersByCategory[cat].forEach(obj => {
-          if (this.open) {
-            map.addLayer(obj.marker);
-            const el = obj.marker.getElement();
-            if (el) {
-              const ping = document.createElement('div'); ping.className = 'radar'; ping.style.background = obj.color;
-              el.appendChild(ping);
-              setTimeout(() => el.removeChild(ping),1000);
-            }
-          } else {
-            map.removeLayer(obj.marker);
-          }
+      ['combat','meditation','lecture'].forEach(cat=>{
+        document.getElementById(cat+'Detail').addEventListener('toggle',function(){
+          markersByCategory[cat].forEach(m=>{
+            if(this.open) map.addLayer(m);
+            else map.removeLayer(m);
+          });
         });
       });
     });
-  });
-</script>
+  </script>
 </body>
 </html>
