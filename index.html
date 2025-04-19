@@ -8,15 +8,17 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
   <style>
     html, body { margin:0; padding:0; height:100%; }
-    body { background:#0d0d0d; color:#0ff; font-family:'Segoe UI', sans-serif; overflow:hidden; }
-    .control-btn { padding:4px 8px; background:#0ff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 0 6px rgba(0,255,255,0.4); z-index:1101; }
+    body { background:#0d0d0d; color:#0ff; font-family:'Segoe UI',sans-serif; overflow:hidden; }
+    .control-btn { position:absolute; padding:4px 8px; background:#0ff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 0 6px rgba(0,255,255,0.4); z-index:1101; }
     /* Sidebar full height */
     #sidebar { position:absolute; top:0; left:0; width:260px; bottom:0; background:#111; padding:10px; overflow-y:auto; box-shadow:2px 0 8px rgba(0,255,255,0.1); z-index:1000; transition:left .3s ease; }
     #sidebar.collapsed { left:-260px; }
-    #hamburger { position:absolute; top:10px; width:24px; height:24px; line-height:24px; text-align:center; }
-    /* Position hamburger relative to sidebar */
-    #hamburger.open { left:260px; }
-    #hamburger.closed { left:0; }
+    /* Collapse button positioning */
+    #hamburger { top:10px; } /* left set via rules below */
+    /* When sidebar open, button at edge */
+    #sidebar:not(.collapsed) ~ #hamburger { left:260px; }
+    /* When collapsed, button at screen edge */
+    #sidebar.collapsed ~ #hamburger { left:0; }
     .sidebar-header { margin-bottom:10px; display:flex; align-items:center; }
     #searchBox { flex:1; }
     #searchBox input { width:100%; padding:6px; border:none; border-radius:4px; background:#222; color:#0ff; }
@@ -41,12 +43,10 @@
 </head>
 <body>
   <!-- Sidebar -->
-  
   <div id="sidebar">
     <div class="sidebar-header">
       <div id="searchBox"><input id="searchInput" placeholder="Search POI..."/></div>
-      <div id="sidebar-buttons" style="margin-left:8px; display:flex; gap:4px;">
-        <button id="hamburger" class="control-btn open">◀</button>
+      <div id="sidebar-buttons">
         <button id="highContrastToggle" class="control-btn">⚙</button>
       </div>
     </div>
@@ -63,6 +63,9 @@
       <button id="screenshotBtn" class="control-btn">📷</button>
     </div>
   </div>
+
+  <!-- Collapse button always visible -->
+  <button id="hamburger" class="control-btn open">◀</button>
 
   <div id="map"></div>
 
