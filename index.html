@@ -19,8 +19,53 @@
     #searchBox{position:absolute;top:10px;left:140px;z-index:1100;background:rgba(0,0,0,0.8);padding:8px;border-radius:4px;box-shadow:0 0 6px rgba(0,255,255,0.5);} 
     #searchInput{width:200px;padding:6px;font-size:14px;border-radius:4px;border:none;background:#222;color:#0ff;}
     /* Sidebar Header */
-    #sidebar h2 { margin-top:0; font-size:1.4em; font-weight:bold; text-transform:uppercase; color:#0ff; border-bottom:2px solid #0ff; padding-bottom:6px; }
-    /* Category colors */
+    #sidebar h2 {
+      margin-top:0;
+      font-size:1.6em;
+      font-weight:900;
+      text-transform:uppercase;
+      color:#0ff;
+      border-bottom:2px solid #0ff;
+      padding-bottom:6px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+    }
+
+    /* Category titles */
+    #combatDetail summary, #combatDetail summary strong {
+      color: #1f8dd6;
+      font-weight:700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      font-size:1.1em;
+    }
+    #meditationDetail summary, #meditationDetail summary strong {
+      color: #228b22;
+      font-weight:700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      font-size:1.1em;
+    }
+    #lectureDetail summary, #lectureDetail summary strong {
+      color: #adff2f;
+      font-weight:700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      font-size:1.1em;
+    }
+
+    /* Remove default summary marker */
+    #sidebar summary {
+      background: none;
+      color: inherit;
+      padding: 4px 0;
+    }
+    #sidebar summary::-webkit-details-marker { display: none; }
+    #sidebar summary::marker { font-size: 0; }
+
+    /* Sidebar list coloring by category */
+    #combatRooms .poi-item { color: #1f8dd6; }
+    #meditationChambers .poi-item { color: #228b22; }
+    #lectureRooms .poi-item { color: #adff2f; }
+    #poiList .poi-item { color: #0ff; }
+
+    /* POI list items styling unchanged below *//* Category colors */
     #combatDetail summary { color:#1f8dd6; }
     #meditationDetail summary { color:#228b22; }
     #lectureDetail summary { color:#adff2f; }
