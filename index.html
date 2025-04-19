@@ -68,9 +68,6 @@
         L.imageOverlay('JK-EODMAP.png', bounds),
         { toggleDisplay:true, mapOptions:{ crs:L.CRS.Simple, zoomControl:false }, width:300, height:300, zoomLevelOffset:-4 }
       ).addTo(map);
-      // Mini follows cursor only
-      map.on('mousemove', e => {
-        miniControl._miniMap.setView(e.latlng, miniControl._miniMap.getZoom(), { animate: false });
       });
 
       // Sidebar toggle
