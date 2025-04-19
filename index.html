@@ -18,6 +18,7 @@
     #hamburger{top:10px;left:10px;} #highContrastToggle{top:10px;left:60px;} #resetBtn{top:10px;right:20px;} #screenshotBtn{top:10px;right:80px;}
     #searchBox{position:absolute;top:10px;left:140px;z-index:1100;background:rgba(0,0,0,0.8);padding:8px;border-radius:4px;box-shadow:0 0 6px rgba(0,255,255,0.5);} 
     #searchInput{width:200px;padding:6px;font-size:14px;border-radius:4px;border:none;background:#222;color:#0ff;}
+
     /* Sidebar Header */
     #sidebar h2 {
       margin-top:0;
@@ -27,81 +28,65 @@
       color:#0ff;
       border-bottom:2px solid #0ff;
       padding-bottom:6px;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      text-shadow:1px 1px 2px rgba(0,0,0,0.5);
     }
 
     /* Category titles */
     #combatDetail summary, #combatDetail summary strong {
       color: #1f8dd6;
       font-weight:700;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      text-shadow:1px 1px 2px rgba(0,0,0,0.5);
       font-size:1.1em;
     }
     #meditationDetail summary, #meditationDetail summary strong {
       color: #228b22;
       font-weight:700;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      text-shadow:1px 1px 2px rgba(0,0,0,0.5);
       font-size:1.1em;
     }
     #lectureDetail summary, #lectureDetail summary strong {
       color: #adff2f;
       font-weight:700;
-      text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+      text-shadow:1px 1px 2px rgba(0,0,0,0.5);
       font-size:1.1em;
     }
 
     /* Remove default summary marker */
-    #sidebar summary {
-      background: none;
-      color: inherit;
-      padding: 4px 0;
+    #sidebar summary { background:none; color:inherit; padding:4px 0; }
+    #sidebar summary::-webkit-details-marker { display:none; }
+    #sidebar summary::marker { font-size:0; }
+
+    /* POI list items - visibility and text-shadow */
+    .poi-item {
+      padding:6px;
+      cursor:pointer;
+      font-weight:600;
+      text-shadow:1px 1px 2px rgba(0,0,0,0.5);
+      margin-bottom:4px;
     }
-    #sidebar summary::-webkit-details-marker { display: none; }
-    #sidebar summary::marker { font-size: 0; }
 
-    /* Sidebar list coloring by category */
-    #combatRooms .poi-item { color: #1f8dd6; }
-    #meditationChambers .poi-item { color: #228b22; }
-    #lectureRooms .poi-item { color: #adff2f; }
-    #poiList .poi-item { color: #0ff; }
+    /* Color by category container */
+    #combatRooms .poi-item { color:#1f8dd6; }
+    #meditationChambers .poi-item { color:#228b22; }
+    #lectureRooms .poi-item { color:#adff2f; }
 
-    /* POI list items styling unchanged below *//* Category colors */
-    #combatDetail summary { color:#1f8dd6; }
-    #meditationDetail summary { color:#228b22; }
-    #lectureDetail summary { color:#adff2f; }
+    /* Color by specific POI for others */
+    #poiList .poi-item.sentinel { color:#f1c40f; }
+    #poiList .poi-item.trial { color:#d4a017; }
+    #poiList .poi-item.jails, #poiList .poi-item.questioning { color:#e74c3c; }
+    #poiList .poi-item.jaf { color:#5dade2; }
+    #poiList .poi-item.combathall { color:#1f75fe; }
+    #poiList .poi-item.archives { color:#39ff14; }
+    #poiList .poi-item.lecturehall { color:#00ff99; }
+    #poiList .poi-item.consular { color:#2ecc71; }
+    #poiList .poi-item.spawn { color:#800000; }
+    #poiList .poi-item.council { color:#ffd700; }
+    #poiList .poi-item.hangar { color:#888888; }
+    #poiList .poi-item.tgdojo { color:#f1c40f; }
+    #poiList .poi-item.vip { color:#d4af37; }
+    #poiList .poi-item.saber { color:#ffffff; }
 
-    /* Remove default summary marker box */
-    #sidebar summary { background: none; color: inherit; padding: 4px 0; }
-    #sidebar summary::-webkit-details-marker { display: none; }
-    #sidebar summary::marker { font-size: 0; }
-
-    /* Sidebar list coloring by category */
-    #combatRooms .poi-item { color: #1f8dd6; }
-    #meditationChambers .poi-item { color: #228b22; }
-    #lectureRooms .poi-item { color: #adff2f; }
-    #poiList .poi-item { color: #0ff; }
-
-    /* POI list items */
-    .poi-item { padding:6px; cursor:pointer; }
-    #meditationDetail summary { color:#228b22; }
-    #lectureDetail summary { color:#adff2f; }
-    /* POI list items */
-    .poi-item { padding:6px; cursor:pointer; }
-    .poi-item.sentinel { color:#f1c40f; }
-    .poi-item.trial { color:#d4a017; }
-    .poi-item.jails, .poi-item.questioning { color:#e74c3c; }
-    .poi-item.jaf { color:#5dade2; }
-    .poi-item.combathall { color:#1f75fe; }
-    .poi-item.archives { color:#39ff14; }
-    .poi-item.lecturehall { color:#00ff99; }
-    .poi-item.consular { color:#2ecc71; }
-    .poi-item.spawn { color:#800000; }
-    .poi-item.council { color:#ffd700; }
-    .poi-item.hangar { color:#888888; }
-    .poi-item.tgdojo { color:#f1c40f; }
-    .poi-item.vip { color:#d4af37; }
-    .poi-item.saber { color:#ffffff; }
-    /* Radar and ping */
+    /* Radar and ping animations */
     .radar { position:absolute; border-radius:50%; animation:radar 1.5s linear infinite; opacity:0.6; z-index:499; }
     @keyframes radar {0%{transform:scale(0.5);opacity:0.6;}100%{transform:scale(3);opacity:0;}}
     .ping::after { content:""; position:absolute; top:50%; left:50%; width:12px; height:12px; background-color:inherit; border-radius:50%; transform:translate(-50%,-50%); animation:ripple 1s forwards; opacity:0.6; z-index:-1; }
@@ -218,109 +203,12 @@
       { name: 'Lecture Room 9', x: 1772, y: 1016 },
       { name: 'Lecture Room 10', x: 3352, y: 6793 }
     ];
-
-    let map, layers;
-    let currentMarker = null;  // track last clicked marker
-
-    function initMap(){
-      map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
-      const bounds=[[0,0],[7830,8192]];
-      L.imageOverlay('JK-EODMAP.png',bounds).addTo(map);
-      const start=location.hash?location.hash.slice(1).split(',').map(Number):[7830/2,8192/2,-2];
-      map.setView([start[0],start[1]],start[2]);
-      map.on('moveend',()=>{const c=map.getCenter(),z=map.getZoom();location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);});
-      layers={combat:L.layerGroup(),meditation:L.layerGroup(),lecture:L.layerGroup(),others:L.layerGroup()};
-      const mini=L.imageOverlay('JK-EODMAP.png',bounds);
-      new L.Control.MiniMap(mini,{toggleDisplay:true,mapOptions:{crs:L.CRS.Simple},zoomLevelFixed:-12}).addTo(map);
-    }
-
-    function createIcon(color){
-      return L.divIcon({className:'',html:`<div style="position:relative;width:20px;height:20px;">`+
-        `<div style="width:20px;height:20px;border-radius:50%;background:#fff"></div>`+
-        `<div style="width:12px;height:12px;border-radius:50%;background:${color};position:absolute;top:4px;left:4px;box-shadow:0 0 6px ${color};"></div>`+
-        `</div>`,iconSize:[20,20]});
-    }
-
-    function initSidebarAndMarkers(){
-      const cont={combat:document.getElementById('combatRooms'),meditation:document.getElementById('meditationChambers'),lecture:document.getElementById('lectureRooms'),others:document.getElementById('poiList')};
-      Object.values(cont).forEach(c=>c.innerHTML='');
-      pois.forEach(p=>{
-        const col=getPinColor(p.name);
-        const icon=createIcon(col);
-        const marker=L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);
-        let grp=layers.others;
-        if(p.name.toLowerCase().startsWith('combat room'))grp=layers.combat;
-        if(p.name.toLowerCase().startsWith('meditation chamber'))grp=layers.meditation;
-        if(p.name.toLowerCase().startsWith('lecture room'))grp=layers.lecture;
-        grp.addLayer(marker);
-
-        const item=document.createElement('div');
-        item.className='poi-item';
-        item.textContent=p.name;
-        // assign color classes
-        if(p.name==='Sentinel Quarters') item.classList.add('sentinel');
-        if(p.name==='Trial Room') item.classList.add('trial');
-        if(p.name==='Jails') item.classList.add('jails');
-        if(p.name==='Questioning Room') item.classList.add('questioning');
-        if(p.name==='JAF Dojo') item.classList.add('jaf');
-        if(p.name==='Combat Hall') item.classList.add('combathall');
-        if(p.name==='Archives') item.classList.add('archives');
-        if(p.name==='Lecture Hall') item.classList.add('lecturehall');
-        if(p.name==='Consular Quarters') item.classList.add('consular');
-        if(p.name==='Spawn') item.classList.add('spawn');
-        if(p.name==='Council Room') item.classList.add('council');
-        if(p.name==='Hangar Teleport') item.classList.add('hangar');
-        if(p.name==='TG Dojo #2' || p.name==='Main TG Dojo') item.classList.add('tgdojo');
-        if(p.name==='VIP Statues') item.classList.add('vip');
-        if(p.name==='Saber Forge') item.classList.add('saber');
-
-        item.onclick = () => {
-          // Remove previous marker when a new POI is clicked
-          if (currentMarker && currentMarker !== marker) {
-            map.removeLayer(currentMarker);
-          }
-          // Add the new marker
-          map.hasLayer(marker) ? null : map.addLayer(marker);
-          currentMarker = marker;
-
-          // Smooth pan with flyTo
-          map.flyTo([p.y, p.x], map.getZoom(), { duration: 1 });
-
-          // Open popup and ping
-          marker.openPopup();
-          const el = marker.getElement();
-          if (el) {
-            el.classList.add('ping');
-            setTimeout(() => el.classList.remove('ping'), 1000);
-            // radar effect
-            const radar = document.createElement('div');
-            radar.className = 'radar';
-            radar.style.background = col;
-            el.appendChild(radar);
-            setTimeout(() => el.removeChild(radar), 1500);
-          }
-        };
-        cont[grp===layers.combat?'combat':grp===layers.meditation?'meditation':grp===layers.lecture?'lecture':'others'].appendChild(item);
-      });
-
-      ['combat','meditation','lecture'].forEach(cat=>{
-        document.getElementById(`${cat}Detail`).addEventListener('toggle',function(){
-          this.open?map.addLayer(layers[cat]):map.removeLayer(layers[cat]);
-          if(this.open){layers[cat].eachLayer(m=>{const el=m.getElement();if(el){el.classList.add('ping');setTimeout(()=>el.classList.remove('ping'),1000);
-            const radar=document.createElement('div');radar.className='radar';radar.style.background=getPinColor(m.getPopup().getContent());el.appendChild(radar);setTimeout(()=>el.removeChild(radar),1500);} });}
-        });
-      });
-    }
-
-    function initControls(){
-      document.getElementById('hamburger').onclick=()=>document.getElementById('sidebar').classList.toggle('collapsed');
-      document.getElementById('highContrastToggle').onclick=()=>document.body.classList.toggle('high-contrast');
-      document.getElementById('resetBtn').onclick=()=>map.setView([7830/2,8192/2],-2);
-      document.getElementById('screenshotBtn').onclick=()=>html2canvas(document.getElementById('map')).then(canvas=>{const a=document.createElement('a');a.download='map.png';a.href=canvas.toDataURL();a.click();});
-    }
-
+    let map, layers, currentMarker=null;
+    function initMap(){ map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});const bounds=[[0,0],[7830,8192]];L.imageOverlay('JK-EODMAP.png',bounds).addTo(map);const start=location.hash?location.hash.slice(1).split(',').map(Number):[7830/2,8192/2,-2];map.setView([start[0],start[1]],start[2]);map.on('moveend',()=>{const c=map.getCenter(),z=map.getZoom();location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);});layers={combat:L.layerGroup(),meditation:L.layerGroup(),lecture:L.layerGroup(),others:L.layerGroup()};const mini=L.imageOverlay('JK-EODMAP.png',bounds);new L.Control.MiniMap(mini,{toggleDisplay:true,mapOptions:{crs:L.CRS.Simple},zoomLevelFixed:-12}).addTo(map);}    
+    function createIcon(color){return L.divIcon({className:'',html:`<div style="position:relative;width:20px;height:20px;">`+`<div style="width:20px;height:20px;border-radius:50%;background:#fff"></div>`+`<div style="width:12px;height:12px;border-radius:50%;background:${color};position:absolute;top:4px;left:4px;box-shadow:0 0 6px ${color};"></div>`+`</div>`,iconSize:[20,20]});}
+    function initSidebarAndMarkers(){const cont={combat:document.getElementById('combatRooms'),meditation:document.getElementById('meditationChambers'),lecture:document.getElementById('lectureRooms'),others:document.getElementById('poiList')};Object.values(cont).forEach(c=>c.innerHTML='');pois.forEach(p=>{const col=getPinColor(p.name);const icon=createIcon(col);const marker=L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);let grp=layers.others;if(p.name.toLowerCase().startsWith('combat room'))grp=layers.combat;if(p.name.toLowerCase().startsWith('meditation chamber'))grp=layers.meditation;if(p.name.toLowerCase().startsWith('lecture room'))grp=layers.lecture;grp.addLayer(marker);const item=document.createElement('div');item.className='poi-item';item.textContent=p.name;if(p.name==='Sentinel Quarters')item.classList.add('sentinel');if(p.name==='Trial Room')item.classList.add('trial');if(p.name==='Jails')item.classList.add('jails');if(p.name==='Questioning Room')item.classList.add('questioning');if(p.name==='JAF Dojo')item.classList.add('jaf');if(p.name==='Combat Hall')item.classList.add('combathall');if(p.name==='Archives')item.classList.add('archives');if(p.name==='Lecture Hall')item.classList.add('lecturehall');if(p.name==='Consular Quarters')item.classList.add('consular');if(p.name==='Spawn')item.classList.add('spawn');if(p.name==='Council Room')item.classList.add('council');if(p.name==='Hangar Teleport')item.classList.add('hangar');if(p.name==='TG Dojo #2'||p.name==='Main TG Dojo')item.classList.add('tgdojo');if(p.name==='VIP Statues')item.classList.add('vip');if(p.name==='Saber Forge')item.classList.add('saber');item.onclick=()=>{if(currentMarker&&currentMarker!==marker)map.removeLayer(currentMarker);map.hasLayer(marker)?null:map.addLayer(marker);currentMarker=marker;map.flyTo([p.y,p.x],map.getZoom(),{duration:1});marker.openPopup();const el=marker.getElement();if(el){el.classList.add('ping');setTimeout(()=>el.classList.remove('ping'),1000);const radar=document.createElement('div');radar.className='radar';radar.style.background=col;el.appendChild(radar);setTimeout(()=>el.removeChild(radar),1500);} };cont[grp===layers.combat?'combat':grp===layers.meditation?'meditation':grp===layers.lecture?'lecture':'others'].appendChild(item);});['combat','meditation','lecture'].forEach(cat=>{document.getElementById(`${cat}Detail`).addEventListener('toggle',function(){this.open?map.addLayer(layers[cat]):map.removeLayer(layers[cat]);if(this.open){layers[cat].eachLayer(m=>{const el=m.getElement();if(el){el.classList.add('ping');setTimeout(()=>el.classList.remove('ping'),1000);const radar=document.createElement('div');radar.className='radar';radar.style.background=getPinColor(m.getPopup().getContent());el.appendChild(radar);setTimeout(()=>el.removeChild(radar),1500);} });}});});}
+    function initControls(){document.getElementById('hamburger').onclick=()=>document.getElementById('sidebar').classList.toggle('collapsed');document.getElementById('highContrastToggle').onclick=()=>document.body.classList.toggle('high-contrast');document.getElementById('resetBtn').onclick=()=>map.setView([7830/2,8192/2],-2);document.getElementById('screenshotBtn').onclick=()=>html2canvas(document.getElementById('map')).then(canvas=>{const a=document.createElement('a');a.download='map.png';a.href=canvas.toDataURL();a.click();});}
     function initSearch(){document.getElementById('searchInput').addEventListener('input',debounce(e=>{const term=e.target.value.toLowerCase();Object.values(layers).forEach(grp=>grp.eachLayer(m=>{const nm=m.getPopup().getContent().toLowerCase();if(term&&nm.includes(term)&&!map.hasLayer(m))map.addLayer(m);}));}),200);}
-
     document.addEventListener('DOMContentLoaded',()=>{initMap();initSidebarAndMarkers();initControls();initSearch();});
   </script>
 </body>
