@@ -19,6 +19,7 @@
     #sidebar { position:absolute; top:60px; left:0; width:260px; bottom:0; background:#111; padding:20px; overflow-y:auto; box-shadow:2px 0 8px rgba(0,255,255,0.1); z-index:1000; transition: left .3s ease, width .3s ease; }
     /* When collapsed, hide background and shadow */
     #sidebar.collapsed { left:-260px; width:0; padding:0; overflow:hidden; background:transparent; box-shadow:none; }
+#sidebar.collapsed ~ #searchBox { display: none; }
     #sidebar h2 { text-align:center; margin:0 0 10px; font-size:1.6em; font-weight:900; border-bottom:2px solid #0ff; padding-bottom:6px; }
     details { margin-bottom:8px; }
     summary { cursor:pointer; font-weight:700; font-size:1.1em; text-align:center; }
