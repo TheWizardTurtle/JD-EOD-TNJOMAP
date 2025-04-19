@@ -138,14 +138,25 @@
       map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
       const bounds = [[0, 0], [7830, 8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-      map.fitBounds(bounds, { animate: false });
-      map.setMaxBounds(bounds);
+      // Ensure the map container is sized correctly
+      map.invalidateSize();
+      // Delay fitting to full bounds until after initial layout
+      setTimeout(() => {
+        map.fitBounds(bounds, { animate: false });
+        // Lock panning to the map extent
+        map.setMaxBounds(bounds);
+      }, 100);
       layers = {
         combat: L.layerGroup().addTo(map),
         meditation: L.layerGroup().addTo(map),
         lecture: L.layerGroup().addTo(map),
         others: L.layerGroup().addTo(map)
       };
+      new L.Control.MiniMap(
+        L.imageOverlay('JK-EODMAP.png', bounds),
+        { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: map.getZoom() - 2 }
+      ).addTo(map);
+    }
       new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds),{
         toggleDisplay:true,
         mapOptions:{crs:L.CRS.Simple},
