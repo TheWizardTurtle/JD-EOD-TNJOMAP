@@ -93,6 +93,11 @@
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
       map.fitBounds(bounds);
       map.setMaxBounds(bounds);
+      // Ensure correct full view after container renders
+      setTimeout(() => {
+        map.invalidateSize();
+        map.fitBounds(bounds);
+      }, 100);
       layers = { combat: L.layerGroup().addTo(map), meditation: L.layerGroup().addTo(map), lecture: L.layerGroup().addTo(map), others: L.layerGroup().addTo(map) };
       new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png',bounds), { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple}, zoomLevelFixed:-12 }).addTo(map);
     }
