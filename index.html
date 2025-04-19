@@ -23,6 +23,8 @@
     .poi-item{padding:6px;margin:4px 0;text-align:center;cursor:pointer;font-weight:600;}
     .sidebar-sep{border-top:1px solid #555;margin:6px 0;}
     #map{position:absolute;top:0;left:260px;right:0;bottom:0;z-index:500;}
+    @keyframes radar { 0% { transform: scale(1); opacity:0.7; } 100% { transform: scale(3); opacity:0; } }
+    .radar { position: absolute; border-radius:50%; animation: radar 1s ease-out; pointer-events:none; }
   </style>
 </head>
 <body>
@@ -46,8 +48,8 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script>
-    // Full POI data
-    const pois = [
+    // Full POI data and colors
+const pois = [
       { name: 'Sentinel Quarters', x: 3032, y: 6784 },
       { name: 'Trial Room', x: 304, y: 6304 },
       { name: 'Jails', x: 1176, y: 4448 },
@@ -66,7 +68,6 @@
       { name: 'Consular Quarters', x: 6968, y: 3476 },
       { name: 'Saber Forge', x: 5292, y: 2696 },
       { name: 'VIP Statues', x: 5296, y: 600 },
-      // Combat Rooms
       { name: 'Combat Room 1', x: 5588, y: 1152 },
       { name: 'Combat Room 2', x: 5576, y: 1388 },
       { name: 'Combat Room 3', x: 5088, y: 1160 },
@@ -90,7 +91,6 @@
       { name: 'Combat Room 21', x: 4196, y: 3920 },
       { name: 'Combat Room 22', x: 4508, y: 3924 },
       { name: 'Combat Room 23', x: 4808, y: 3904 },
-      // Meditation Chambers
       { name: 'Meditation Chamber 1', x: 6608, y: 2508 },
       { name: 'Meditation Chamber 2', x: 6608, y: 2358 },
       { name: 'Meditation Chamber 3', x: 6622, y: 2072 },
@@ -105,7 +105,6 @@
       { name: 'Meditation Chamber 13', x: 6796, y: 4720 },
       { name: 'Meditation Chamber 14', x: 7156, y: 4716 },
       { name: 'Meditation Chamber 15', x: 7152, y: 4044 },
-      // Lecture Rooms
       { name: 'Lecture Room 1', x: 6606, y: 1710 },
       { name: 'Lecture Room 2', x: 6836, y: 1452 },
       { name: 'Lecture Room 3', x: 4904, y: 1408 },
@@ -117,6 +116,7 @@
       { name: 'Lecture Room 9', x: 1772, y: 1016 },
       { name: 'Lecture Room 10', x: 3352, y: 6793 }
     ];
+
     const colorMap = {
       'Sentinel Quarters': '#f1c40f',
       'Trial Room': '#d4a017',
@@ -139,54 +139,69 @@
 
     const prefixMap = { 'Combat Room':'#1f8dd6','Meditation Chamber':'#90ee90','Lecture Room':'#006400' };
     function getColor(name) {
-      return colorMap[name] || Object.entries(prefixMap).find(([k]) => name.startsWith(k))?.[1] || '#0ff';
+      return colorMap[name] || Object.entries(prefixMap).find(([k])=>name.startsWith(k))?.[1] || '#0ff';
     }
 
-    let map, layers, currentMarker;
+    let map, markers = {}, currentMarker;
     function initMap() {
       map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
       const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
       map.fitBounds(bounds, { animate: false });
+      // allow zoom out 2 levels
+      const fullZoom = map.getZoom(); map.setMinZoom(fullZoom - 2);
       map.setMaxBounds(bounds);
-      layers = { combat:L.layerGroup().addTo(map), meditation:L.layerGroup().addTo(map), lecture:L.layerGroup().addTo(map), others:L.layerGroup().addTo(map) };
-      new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds), { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple}, zoomLevelFixed: map.getZoom()-2 }).addTo(map);
+      new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds), { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple}, zoomLevelFixed: fullZoom-2 }).addTo(map);
     }
 
     function initSidebar() {
-      const containers = { combat:document.getElementById('combatRooms'), meditation:document.getElementById('meditationChambers'), lecture:document.getElementById('lectureRooms'), others:document.getElementById('poiList') };
-      Object.values(containers).forEach(c => c.innerHTML = '');
+      const containers = {
+        combat: document.getElementById('combatRooms'),
+        meditation: document.getElementById('meditationChambers'),
+        lecture: document.getElementById('lectureRooms'),
+        others: document.getElementById('poiList')
+      };
+      // Populate list
       pois.forEach(p => {
-        if (p.name === 'Holocron Vault') return;
-        const col = getColor(p.name);
-        const icon = L.divIcon({ html: `<div style="width:20px;height:20px;border-radius:50%;background:${col};border:2px solid #fff;box-shadow:0 0 6px ${col};"></div>`, iconSize:[20,20] });
-        const marker = L.marker([p.y,p.x], { icon }).bindPopup(`<strong>${p.name}</strong>`);
-        let grp = layers.others;
-        if (p.name.startsWith('Combat Room')) grp = layers.combat;
-        else if (p.name.startsWith('Meditation Chamber')) grp = layers.meditation;
-        else if (p.name.startsWith('Lecture Room')) grp = layers.lecture;
-        grp.addLayer(marker);
-        const li = document.createElement('li'); li.className='poi-item'; li.textContent=p.name; li.style.color=col;
-        li.onclick = () => {
-          if (currentMarker && currentMarker !== marker) map.removeLayer(currentMarker);
-          if (!map.hasLayer(marker)) map.addLayer(marker);
-          currentMarker = marker; marker.openPopup(); map.flyTo([p.y,p.x], map.getZoom(), { duration:1 });
-        };
-        const key = grp===layers.combat?'combat':grp===layers.meditation?'meditation':grp===layers.lecture?'lecture':'others';
-        containers[key].appendChild(li);
+        if(p.name==='Holocron Vault') return;
+        const color = getColor(p.name);
+        // Create marker but don't add
+        const icon = L.divIcon({ html:`<div style="width:16px;height:16px;border-radius:50%;background:${color};"></div>`, iconSize:[16,16] });
+        const marker = L.marker([p.y,p.x],{icon});
+        markers[p.name] = { marker, color };
+        // Sidebar item
+        const li = document.createElement('li'); li.textContent = p.name; li.className='poi-item'; li.style.color=color;
+        li.addEventListener('click', () => {
+          // remove previous
+          if(currentMarker) map.removeLayer(currentMarker.marker);
+          // add new
+          map.addLayer(marker);
+          currentMarker = markers[p.name];
+          marker.openPopup();
+          map.flyTo([p.y,p.x], map.getZoom(), { duration: 1 });
+          // ping effect
+          const el = marker.getElement();
+          if(el) {
+            const ping = document.createElement('div');
+            ping.className = 'radar'; ping.style.background = color;
+            el.appendChild(ping);
+            setTimeout(() => el.removeChild(ping), 1000);
+          }
+        });
+        // assign to category
+        let cont = containers.others;
+        if(p.name.startsWith('Combat Room')) cont=containers.combat;
+        else if(p.name.startsWith('Meditation Chamber')) cont=containers.meditation;
+        else if(p.name.startsWith('Lecture Room')) cont=containers.lecture;
+        cont.appendChild(li);
       });
-      const order=['Sentinel Quarters','Guardian Quarters','Consular Quarters','Main TG Dojo','TG Dojo #2','Trial Room','VIP Statues','Council Room','JAF Dojo','Combat Hall','Cantina','Lecture Hall','Archives','Saber Forge','Spawn','Questioning Room','Jails','Hangar Teleport'];
-      const ul=containers.others; const items=Array.from(ul.children); ul.innerHTML=''; order.forEach(name=>{ const it=items.find(li=>li.textContent===name); if(it) ul.appendChild(it); });
+      // order others
+      const order = ['Sentinel Quarters','Guardian Quarters','Consular Quarters','Main TG Dojo','TG Dojo #2','Trial Room','VIP Statues','Council Room','JAF Dojo','Combat Hall','Cantina','Lecture Hall','Archives','Saber Forge','Spawn','Questioning Room','Jails','Hangar Teleport'];
+      const ul = containers.others, items = Array.from(ul.children);
+      ul.innerHTML=''; order.forEach(name => { const it = items.find(li=>li.textContent===name); if(it) ul.appendChild(it); });
     }
 
-    function initControls() {
-      document.getElementById('hamburger').onclick = () => document.getElementById('sidebar').classList.toggle('collapsed');
-      document.getElementById('highContrastToggle').onclick = () => document.body.classList.toggle('high-contrast');
-      document.getElementById('resetBtn').onclick = () => map.fitBounds([[0,0],[7830,8192]], { animate:false });
-      document.getElementById('screenshotBtn').onclick = () => html2canvas(document.getElementById('map')).then(canvas => { const a=document.createElement('a'); a.href=canvas.toDataURL(); a.download='map.png'; a.click(); });
-    }
-
-    document.addEventListener('DOMContentLoaded', () => { initMap(); initSidebar(); initControls(); });
+    document.addEventListener('DOMContentLoaded', () => { initMap(); initSidebar(); });
   </script>
 </body>
 </html>
