@@ -4,36 +4,28 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jedi Temple Interactive Map</title>
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <!-- MiniMap CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
   <style>
     html, body { margin: 0; height: 100%; background: #0d0d0d; font-family: 'Segoe UI', sans-serif; }
-    .control-btn { position: absolute; padding: 8px 12px; background: #0ff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; box-shadow: 0 0 10px rgba(0,255,255,0.4); z-index: 1100; }
-    #hamburger { top: 10px; left: 10px; }
-    #highContrastToggle { top: 10px; left: 60px; }
-    #resetBtn { top: 10px; right: 20px; }
-    #screenshotBtn { top: 10px; right: 80px; }
-    #searchBox { position: absolute; top: 10px; left: 140px; z-index: 1100; background: rgba(0,0,0,0.8); padding: 8px; border-radius: 4px; box-shadow: 0 0 6px rgba(0,255,255,0.5); }
-    #searchInput { width: 200px; padding: 6px; font-size: 14px; border-radius: 4px; border: none; background: #222; color: #0ff; }
-    #sidebar { position: absolute; top: 60px; left: 0; width: 260px; height: calc(100% - 60px); background: #111; color: #0ff; overflow-y: visible; padding: 20px; box-shadow: 2px 0 8px rgba(0,255,255,0.1); z-index: 1000; transition: width .3s; }
-    #sidebar.collapsed { width: 0; padding: 0; overflow: hidden; background: transparent; }
-    #sidebar h2 { text-align: center; margin: 0 0 10px; font-size: 1.6em; font-weight: 900; text-transform: uppercase; color: #0ff; border-bottom: 2px solid #0ff; padding-bottom: 6px; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
-    details summary { list-style: none; cursor: pointer; margin: 8px 0 4px; font-size: 1.1em; font-weight: 700; text-align: center; }
-    #combatDetail summary { color: #1f8dd6; }
-    #meditationDetail summary { color: #228b22; }
-    #lectureDetail summary { color: #adff2f; }
-    summary::-webkit-details-marker { display: none; }
-    summary::marker { font-size: 0; }
-    .poi-list { list-style: none; padding: 0; margin: 0 0 10px; }
-    .poi-item { padding: 6px; margin: 4px 0; text-align: center; font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); cursor: pointer; }
-    .sidebar-sep { border: none; border-top: 1px solid #555; margin: 6px 0; }
-    #map { position: absolute; top: 0; left: 260px; width: calc(100% - 260px); height: 100%; transition: left .3s, width .3s; z-index: 500; }
-    .radar { position: absolute; border-radius: 50%; animation: radar 1.5s linear infinite; opacity: 0.6; z-index: 499; }
-    @keyframes radar { 0% { transform: scale(0.5); opacity: 0.6; } 100% { transform: scale(3); opacity: 0; } }
-    .ping::after { content: ''; position: absolute; top: 50%; left: 50%; width: 12px; height: 12px; background-color: inherit; border-radius: 50%; transform: translate(-50%, -50%); animation: ripple 1s forwards; opacity: 0.6; z-index: -1; }
-    @keyframes ripple { 0% { transform: translate(-50%, -50%) scale(1); opacity: 0.6; } 100% { transform: translate(-50%, -50%) scale(3); opacity: 0; } }
+    .control-btn { position:absolute; padding:8px 12px; background:#0ff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; box-shadow:0 0 10px rgba(0,255,255,0.4); z-index:1100; }
+    #hamburger{top:10px; left:10px;} #highContrastToggle{top:10px; left:60px;} #resetBtn{top:10px; right:20px;} #screenshotBtn{top:10px; right:80px;}
+    #searchBox{position:absolute; top:10px; left:140px; z-index:1100; background:rgba(0,0,0,0.8); padding:8px; border-radius:4px; box-shadow:0 0 6px rgba(0,255,255,0.5);} 
+    #searchInput{width:200px; padding:6px; font-size:14px; border-radius:4px; border:none; background:#222; color:#0ff;}
+    #sidebar{position:absolute; top:60px; left:0; width:260px; height:calc(100% - 60px); background:#111; color:#0ff; overflow-y:visible; padding:20px; box-shadow:2px 0 8px rgba(0,255,255,0.1); transition:width .3s; z-index:1000;}
+    #sidebar.collapsed{width:0; padding:0; overflow:hidden; background:transparent;}
+    #sidebar h2{margin:0 0 10px; text-align:center; font-size:1.6em; font-weight:900; text-transform:uppercase; color:#0ff; border-bottom:2px solid #0ff; padding-bottom:6px; text-shadow:1px 1px 2px rgba(0,0,0,0.5);}
+    details summary{list-style:none; cursor:pointer; margin:8px 0 4px; font-size:1.1em; font-weight:700; text-align:center;}
+    #combatDetail summary{color:#1f8dd6;} #meditationDetail summary{color:#228b22;} #lectureDetail summary{color:#adff2f;}
+    summary::-webkit-details-marker{display:none;} summary::marker{font-size:0;}
+    .poi-list{list-style:none; padding:0; margin:0 0 10px;}
+    .poi-item{padding:6px; margin:4px 0; text-align:center; font-weight:600; text-shadow:1px 1px 2px rgba(0,0,0,0.5); cursor:pointer;}
+    .sidebar-sep{border:none; border-top:1px solid #555; margin:6px 0;}
+    #map{position:absolute; top:0; left:260px; width:calc(100% - 260px); height:100%; transition:left .3s,width .3s; z-index:500;}
+    .radar{position:absolute; border-radius:50%; animation:radar 1.5s linear infinite; opacity:0.6; z-index:499;}
+    @keyframes radar{0%{transform:scale(0.5);opacity:0.6;}100%{transform:scale(3);opacity:0;}}
+    .ping::after{content:''; position:absolute; top:50%; left:50%; width:12px; height:12px; background-color:inherit; border-radius:50%; transform:translate(-50%, -50%); animation:ripple 1s forwards; opacity:0.6; z-index:-1;}
+    @keyframes ripple{0%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}100%{transform:translate(-50%,-50%) scale(3);opacity:0;}}
   </style>
 </head>
 <body>
@@ -57,15 +49,15 @@
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script type="module">
-    const debounce = (fn, delay=200) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; };
-    const colorMap = {
+    const debounce=(fn,delay=200)=>{let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),delay);}};
+    const colorMap={
       'sentinel quarters':'#f1c40f','trial room':'#d4a017','jails':'#e74c3c','questioning room':'#e74c3c',
       'jaf dojo':'#5dade2','cantina':'#0ff','archives':'#39ff14','combat hall':'#1f75fe','lecture hall':'#adff2f',
       'spawn':'#800000','council room':'#ffd700','hangar teleport':'#888888','tg dojo #2':'#f1c40f','main tg dojo':'#f1c40f',
       'holocron vault':'#39ff14','consular quarters':'#2ecc71','saber forge':'#ffffff','vip statues':'#d4af37'
     };
-    const prefixMap = {'combat room':'#1f8dd6','meditation chamber':'#90ee90','lecture room':'#006400'};
-    const getPinColor = name => { const k=name.toLowerCase(); return colorMap[k]||Object.entries(prefixMap).find(([p])=>k.startsWith(p))?.[1]||'#0ff'; };
+    const prefixMap={'combat room':'#1f8dd6','meditation chamber':'#90ee90','lecture room':'#006400'};
+    const getPinColor=name=>{const k=name.toLowerCase();return colorMap[k]||Object.entries(prefixMap).find(([p])=>k.startsWith(p))?.[1]||'#0ff';};
      const pois = [
       // Static POIs
       { name: 'Sentinel Quarters', x: 3032, y: 6784 },
@@ -139,5 +131,90 @@
       { name: 'Lecture Room 10', x: 3352, y: 6793 }
     ];
     let map,layers,currentMarker=null;
-    function initMap(){ map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2}); const bounds=[[0,0],[7830,8192]]; L.imageOverlay('JK-EODMAP.png',bounds).addTo(map); const start=location.hash?location.hash.slice(1).split(',').map(Number):[7830/2,8192/2,-2]; map.setView([start[0],start[1]],start[2]); map.on('moveend',()=>{const c=map.getCenter(),z=map.getZoom();location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);}); layers={combat:L.layerGroup(),meditation:L.layerGroup(),lecture:L.layerGroup(),others:L.layerGroup()}; const mini=L.imageOverlay('JK-EODMAP.png',bounds); new L.Control.MiniMap(mini,{toggleDisplay:true,mapOptions:{crs:L.CRS.Simple},zoomLevelFixed:-12}).addTo(map);}    
-    function createIcon(color){ return L.divIcon({className:'',html:`<div style="position:relative;width:20px;height:20px;">`+`<div style="width:20px;height:20px;border-radius:50%;background:#fff"></div>`+
+    function initMap(){
+      map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
+      const bounds=[[0,0],[7830,8192]];
+      L.imageOverlay('JK-EODMAP.png',bounds).addTo(map);
+      const start=location.hash?location.hash.slice(1).split(',').map(Number):[7830/2,8192/2,-2];
+      map.setView([start[0],start[1]],start[2]);
+      map.on('moveend',()=>{const c=map.getCenter(),z=map.getZoom();location.replace(`#${c.lat.toFixed(2)},${c.lng.toFixed(2)},${z}`);});
+      layers={combat:L.layerGroup(),meditation:L.layerGroup(),lecture:L.layerGroup(),others:L.layerGroup()};
+      const mini=L.imageOverlay('JK-EODMAP.png',bounds);
+      new L.Control.MiniMap(mini,{toggleDisplay:true,mapOptions:{crs:L.CRS.Simple},zoomLevelFixed:-12}).addTo(map);
+    }
+    function createIcon(color){
+      return L.divIcon({className:'',html:`<div style="position:relative;width:20px;height:20px;">`+
+        `<div style="width:20px;height:20px;border-radius:50%;background:#fff"></div>`+
+        `<div style="width:12px;height:12px;border-radius:50%;background:${color};position:absolute;top:4px;left:4px;box-shadow:0 0 6px ${color};"></div>`+
+        `</div>`,iconSize:[20,20]});
+    }
+    function initSidebarAndMarkers(){
+      const containers={
+        combat:document.getElementById('combatRooms'),
+        meditation:document.getElementById('meditationChambers'),
+        lecture:document.getElementById('lectureRooms'),
+        others:document.getElementById('poiList')
+      };
+      Object.values(containers).forEach(c=>c.innerHTML='');
+      pois.forEach(p=>{
+        const col=getPinColor(p.name);
+        const icon=createIcon(col);
+        const marker=L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);
+        let group=layers.others;
+        if(p.name.toLowerCase().startsWith('combat room')) group=layers.combat;
+        else if(p.name.toLowerCase().startsWith('meditation chamber')) group=layers.meditation;
+        else if(p.name.toLowerCase().startsWith('lecture room')) group=layers.lecture;
+        group.addLayer(marker);
+
+        const li=document.createElement('li');
+        li.className='poi-item';
+        li.textContent=p.name;
+        li.style.color=col;
+        li.onclick=()=>{
+          if(currentMarker&&currentMarker!==marker) map.removeLayer(currentMarker);
+          if(!map.hasLayer(marker)) map.addLayer(marker);
+          currentMarker=marker;
+          map.flyTo([p.y,p.x],map.getZoom(),{duration:1});
+          marker.openPopup();
+          const el=marker.getElement();
+          if(el){ el.classList.add('ping'); setTimeout(()=>el.classList.remove('ping'),1000);
+            const radar=document.createElement('div'); radar.className='radar'; radar.style.background=col; el.appendChild(radar);
+            setTimeout(()=>el.removeChild(radar),1500);
+          }
+        };
+        containers[group===layers.combat?'combat':group===layers.meditation?'meditation':group===layers.lecture?'lecture':'others'].appendChild(li);
+      });
+      // reorder others by color groups
+      const order=[
+        'archives','consular','holocronvault','lecturehall',
+        'jails','questioningroom',
+        'sentinelquarters','trialroom','tgdojo2','councilroom','vipstatues',
+        'saberforge','hangarteleport'
+      ];
+      const otherList=document.getElementById('poiList');
+      const items=Array.from(otherList.children);
+      otherList.innerHTML='';
+      order.forEach(cls=>{
+        items.filter(li=>li.textContent.replace(/\s+/g,'').toLowerCase().includes(cls)).forEach(li=>otherList.appendChild(li));
+      });
+    }
+    function initControls(){
+      document.getElementById('hamburger').onclick=()=>document.getElementById('sidebar').classList.toggle('collapsed');
+      document.getElementById('highContrastToggle').onclick=()=>document.body.classList.toggle('high-contrast');
+      document.getElementById('resetBtn').onclick=()=>map.setView([7830/2,8192/2],-2);
+      document.getElementById('screenshotBtn').onclick=()=>html2canvas(document.getElementById('map')).then(canvas=>{const a=document.createElement('a');a.download='map.png';a.href=canvas.toDataURL();a.click();});
+    }
+    function initSearch(){
+      document.getElementById('searchInput').addEventListener('input',debounce(e=>{
+        const val=e.target.value.toLowerCase();
+        pois.forEach(p=>{
+          if(p.name.toLowerCase().includes(val)){
+            const markerLayer=[...layers.combat,_...layers.meditation,...layers.lecture,...layers.others];
+          }
+        });
+      }),200);
+    }
+    document.addEventListener('DOMContentLoaded',()=>{initMap();initSidebarAndMarkers();initControls();});
+  </script>
+</body>
+</html>
