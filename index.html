@@ -172,8 +172,24 @@
         item.role = 'button';
         item.textContent = p.name;
         item.addEventListener('click', () => {
-          if (!map.hasLayer(grp)) map.addLayer(grp);
+          // Show only this marker or category group
+          if (grp === layers.others) {
+            if (!map.hasLayer(marker)) marker.addTo(map);
+          } else {
+            if (!map.hasLayer(grp)) map.addLayer(grp);
+          }
+          // Pan to item
           map.flyTo([p.y, p.x], 0, { duration: 0.7 });
+          marker.openPopup();
+          // Pulse at correct location
+          setTimeout(() => {
+            const el = marker.getElement();
+            if (el) {
+              el.classList.add('ping');
+              setTimeout(() => el.classList.remove('ping'), 1000);
+            }
+          }, 400);
+        });
           marker.openPopup();
           setTimeout(() => {
             const el = marker.getElement();
@@ -192,15 +208,19 @@
         document.getElementById(`${cat}Detail`).addEventListener('toggle', function() {
           if (this.open) {
             map.addLayer(layers[cat]);
-            // Delay ping to ensure correct rendering
-            setTimeout(() => {
-              layers[cat].eachLayer(m => {
-                const el = m.getElement();
-                if (el) {
-                  el.classList.add('ping');
-                  setTimeout(() => el.classList.remove('ping'), 1000);
-                }
-              });
+            // Immediately pulse without moving
+            layers[cat].eachLayer(m => {
+              const el = m.getElement();
+              if (el) {
+                el.classList.add('ping');
+                setTimeout(() => el.classList.remove('ping'), 1000);
+              }
+            });
+          } else {
+            map.removeLayer(layers[cat]);
+          }
+        });
+      });
             }, 800);
           } else {
             map.removeLayer(layers[cat]);
