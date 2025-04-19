@@ -65,7 +65,13 @@
 
       new L.Control.MiniMap(
         L.imageOverlay('JK-EODMAP.png', bounds),
-        { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple, zoomControl: false }, zoomLevelFixed: map.getMinZoom() }
+        {
+          toggleDisplay: true,
+          mapOptions: { crs: L.CRS.Simple, zoomControl: false },
+          width: 150,
+          height: 150,
+          zoomLevelOffset: -2
+        }
       ).addTo(map);
 
       const hamburger = document.getElementById('hamburger');
