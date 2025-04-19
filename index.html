@@ -11,22 +11,38 @@
   <style>
     html, body { margin:0; height:100%; font-family:'Segoe UI',sans-serif; }
     #sidebar { position:absolute; top:60px; left:0; width:260px; height:calc(100% - 60px); background:#111; color:#0ff; overflow-y:auto; padding:20px; box-shadow:2px 0 8px rgba(0,255,255,0.1); transition: width .3s ease; z-index:1000; }
-    #sidebar.collapsed { width:0; padding:0; overflow:hidden; box-shadow:none; }
+    #sidebar.collapsed { width:0; padding:0; overflow:hidden; box-shadow:none; background:transparent; }
     #map { position:absolute; top:0; left:260px; width:calc(100% - 260px); height:100%; transition:left .3s ease,width .3s ease; z-index:500; }
     #sidebar.collapsed + #map { left:0; width:100%; }
     .control-btn { position:absolute; padding:8px 12px; background:#0ff; border:none; border-radius:6px; cursor:pointer; font-weight:bold; box-shadow:0 0 10px rgba(0,255,255,0.4); z-index:1100; }
     #hamburger{top:10px;left:10px;} #highContrastToggle{top:10px;left:60px;} #resetBtn{top:10px;right:20px;} #screenshotBtn{top:10px;right:80px;}
     #searchBox{position:absolute;top:10px;left:140px;z-index:1100;background:rgba(0,0,0,0.8);padding:8px;border-radius:4px;box-shadow:0 0 6px rgba(0,255,255,0.5);} 
     #searchInput{width:200px;padding:6px;font-size:14px;border-radius:4px;border:none;background:#222;color:#0ff;}
-    #sidebar h2 { margin-top:0; font-size:1.2em; font-weight:bold; text-transform:uppercase; color:#fff; border-bottom:1px solid #0ff; padding-bottom:4px; }
+    /* Sidebar Header */
+    #sidebar h2 { margin-top:0; font-size:1.4em; font-weight:bold; text-transform:uppercase; color:#0ff; border-bottom:2px solid #0ff; padding-bottom:6px; }
+    /* Category colors */
     #combatDetail summary { color:#1f8dd6; }
-    #lectureDetail summary { color:#90ee90; }
-    #meditationDetail summary { color:#2ecc71; }
-    .poi-item { padding:4px; cursor:pointer; }
+    #meditationDetail summary { color:#228b22; }
+    #lectureDetail summary { color:#adff2f; }
+    /* POI list items */
+    .poi-item { padding:6px; cursor:pointer; }
     .poi-item.sentinel { color:#f1c40f; }
     .poi-item.trial { color:#d4a017; }
+    .poi-item.jails, .poi-item.questioning { color:#e74c3c; }
+    .poi-item.jaf { color:#5dade2; }
+    .poi-item.combathall { color:#1f75fe; }
+    .poi-item.archives { color:#39ff14; }
+    .poi-item.lecturehall { color:#00ff99; }
+    .poi-item.consular { color:#2ecc71; }
+    .poi-item.spawn { color:#800000; }
+    .poi-item.council { color:#ffd700; }
+    .poi-item.hangar { color:#888888; }
+    .poi-item.tgdojo { color:#f1c40f; }
+    .poi-item.vip { color:#d4af37; }
+    .poi-item.saber { color:#ffffff; }
+    /* Radar and ping */
     .radar { position:absolute; border-radius:50%; animation:radar 1.5s linear infinite; opacity:0.6; z-index:499; }
-    @keyframes radar {0%{transform:scale(0.5);opacity:0.6;}100%{transform:scale(3);opacity:0;} }
+    @keyframes radar {0%{transform:scale(0.5);opacity:0.6;}100%{transform:scale(3);opacity:0;}}
     .ping::after { content:""; position:absolute; top:50%; left:50%; width:12px; height:12px; background-color:inherit; border-radius:50%; transform:translate(-50%,-50%); animation:ripple 1s forwards; opacity:0.6; z-index:-1; }
     @keyframes ripple {0%{transform:translate(-50%,-50%) scale(1);opacity:0.6;}100%{transform:translate(-50%,-50%) scale(3);opacity:0;}}
   </style>
@@ -143,6 +159,7 @@
     ];
 
     let map,layers;
+
     function initMap(){
       map=L.map('map',{crs:L.CRS.Simple,minZoom:-2,maxZoom:2});
       const bounds=[[0,0],[7830,8192]];
@@ -174,22 +191,48 @@
         if(p.name.toLowerCase().startsWith('meditation chamber'))grp=layers.meditation;
         if(p.name.toLowerCase().startsWith('lecture room'))grp=layers.lecture;
         grp.addLayer(marker);
-        const item=document.createElement('div');item.className='poi-item';item.textContent=p.name;
-        if(p.name==='Sentinel Quarters')item.classList.add('sentinel');
-        if(p.name==='Trial Room')item.classList.add('trial');
-        item.onclick=()=>{
-          if(grp===layers.others){ map.hasLayer(marker)?map.removeLayer(marker):map.addLayer(marker); }
-          else{ map.hasLayer(grp)?map.removeLayer(grp):map.addLayer(grp); }
-          const el=marker.getElement(); if(el){ el.classList.add('ping'); setTimeout(()=>el.classList.remove('ping'),1000); }
-          // radar effect
-          if(el){ const radar=document.createElement('div'); radar.className='radar'; radar.style.background=col; el.appendChild(radar); setTimeout(()=>el.removeChild(radar),1500); }
+
+        const item=document.createElement('div');
+        item.className='poi-item';
+        item.textContent=p.name;
+        // assign color classes
+        if(p.name==='Sentinel Quarters') item.classList.add('sentinel');
+        if(p.name==='Trial Room') item.classList.add('trial');
+        if(p.name==='Jails') item.classList.add('jails');
+        if(p.name==='Questioning Room') item.classList.add('questioning');
+        if(p.name==='JAF Dojo') item.classList.add('jaf');
+        if(p.name==='Combat Hall') item.classList.add('combathall');
+        if(p.name==='Archives') item.classList.add('archives');
+        if(p.name==='Lecture Hall') item.classList.add('lecturehall');
+        if(p.name==='Consular Quarters') item.classList.add('consular');
+        if(p.name==='Spawn') item.classList.add('spawn');
+        if(p.name==='Council Room') item.classList.add('council');
+        if(p.name==='Hangar Teleport') item.classList.add('hangar');
+        if(p.name==='TG Dojo #2' || p.name==='Main TG Dojo') item.classList.add('tgdojo');
+        if(p.name==='VIP Statues') item.classList.add('vip');
+        if(p.name==='Saber Forge') item.classList.add('saber');
+
+        item.onclick = () => {
+          if(grp===layers.others){
+            map.hasLayer(marker)?map.removeLayer(marker):map.addLayer(marker);
+          } else {
+            map.hasLayer(grp)?map.removeLayer(grp):map.addLayer(grp);
+          }
+          // ping and radar
+          const el = marker.getElement();
+          if(el){ el.classList.add('ping'); setTimeout(()=>el.classList.remove('ping'),1000);
+            const radar = document.createElement('div'); radar.className='radar'; radar.style.background=col; el.appendChild(radar);
+            setTimeout(()=>el.removeChild(radar),1500);
+          }
         };
         cont[grp===layers.combat?'combat':grp===layers.meditation?'meditation':grp===layers.lecture?'lecture':'others'].appendChild(item);
       });
+
       ['combat','meditation','lecture'].forEach(cat=>{
         document.getElementById(`${cat}Detail`).addEventListener('toggle',function(){
           this.open?map.addLayer(layers[cat]):map.removeLayer(layers[cat]);
-          if(this.open){layers[cat].eachLayer(m=>{const el=m.getElement();if(el){el.classList.add('ping');setTimeout(()=>el.classList.remove('ping'),1000);const radar=document.createElement('div');radar.className='radar';radar.style.background=getPinColor(cat+' room');el.appendChild(radar);setTimeout(()=>el.removeChild(radar),1500);} });}
+          if(this.open){layers[cat].eachLayer(m=>{const el=m.getElement();if(el){el.classList.add('ping');setTimeout(()=>el.classList.remove('ping'),1000);
+            const radar=document.createElement('div');radar.className='radar';radar.style.background=getPinColor(m.getPopup().getContent());el.appendChild(radar);setTimeout(()=>el.removeChild(radar),1500);} });}
         });
       });
     }
@@ -201,7 +244,7 @@
       document.getElementById('screenshotBtn').onclick=()=>html2canvas(document.getElementById('map')).then(canvas=>{const a=document.createElement('a');a.download='map.png';a.href=canvas.toDataURL();a.click();});
     }
 
-    function initSearch(){document.getElementById('searchInput').addEventListener('input',debounce(e=>{const t=e.target.value.toLowerCase();Object.values(layers).forEach(grp=>grp.eachLayer(m=>{const nm=m.getPopup().getContent().toLowerCase();if(t&&nm.includes(t)&&!map.hasLayer(m))map.addLayer(m);}));}),200);}
+    function initSearch(){document.getElementById('searchInput').addEventListener('input',debounce(e=>{const term=e.target.value.toLowerCase();Object.values(layers).forEach(grp=>grp.eachLayer(m=>{const nm=m.getPopup().getContent().toLowerCase();if(term&&nm.includes(term)&&!map.hasLayer(m))map.addLayer(m);}));}),200);}
 
     document.addEventListener('DOMContentLoaded',()=>{initMap();initSidebarAndMarkers();initControls();initSearch();});
   </script>
