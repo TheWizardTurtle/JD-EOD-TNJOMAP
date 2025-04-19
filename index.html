@@ -35,13 +35,15 @@
   </style>
 </head>
 <body>
-  <!-- Persistent Controls -->
-  <button id="hamburger" class="control-btn" style="position:absolute; top:10px; left:10px;">◀</button>
-  <button id="highContrastToggle" class="control-btn" style="position:absolute; top:10px; left:60px;">⚙</button>
   <!-- Sidebar -->
   <div id="sidebar">
     <div class="sidebar-header">
       <div id="searchBox"><input id="searchInput" placeholder="Search POI..."/></div>
+      <div id="sidebar-buttons" style="margin-left:8px; display:flex; gap:4px;">
+        <button id="hamburger" class="control-btn">◀</button>
+        <button id="highContrastToggle" class="control-btn">⚙</button>
+      </div>
+    </div>
     </div>
     <h2>Points of Interest</h2>
     <details id="combatDetail"><summary>Combat Rooms</summary><ul id="combatRooms" class="poi-list"></ul></details>
