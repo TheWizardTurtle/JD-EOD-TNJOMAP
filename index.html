@@ -140,12 +140,38 @@
 
     let map, layers, currentMarker;
     function initMap() {
+      // Initialize map
       map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
+      const bounds = [[0, 0], [7830, 8192]];
+      // Add the map image
+      L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+      // Immediately fit to full map extent without animation
+      map.fitBounds(bounds, { animate: false });
+      // Restrict panning to the image bounds
+      map.setMaxBounds(bounds);
+      // Prepare layer groups
+      layers = {
+        combat: L.layerGroup().addTo(map),
+        meditation: L.layerGroup().addTo(map),
+        lecture: L.layerGroup().addTo(map),
+        others: L.layerGroup().addTo(map)
+      };
+      // Add minimap
+      new L.Control.MiniMap(
+        L.imageOverlay('JK-EODMAP.png', bounds),
+        { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: map.getZoom() - 2 }
+      ).addTo(map);
+    });
       const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
       // Use fitBounds only to show entire extent on load
-      map.fitBounds(bounds, { animate: false });
-      map.setMaxBounds(bounds);
+      // Ensure the container is properly sized before fitting
+      map.invalidateSize();
+      // Delay fitBounds to allow layout to stabilize
+      setTimeout(() => {
+        map.fitBounds(bounds, { animate: false });
+        map.setMaxBounds(bounds);
+      }, 200);
       layers = { combat:L.layerGroup().addTo(map), meditation:L.layerGroup().addTo(map), lecture:L.layerGroup().addTo(map), others:L.layerGroup().addTo(map) };
       new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png',bounds),{toggleDisplay:true,mapOptions:{crs:L.CRS.Simple},zoomLevelFixed:map.getZoom()-2}).addTo(map);
     }
