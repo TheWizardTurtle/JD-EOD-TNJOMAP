@@ -55,9 +55,9 @@
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
       // Fit full map and set default zoom to 3
       map.fitBounds(bounds, { animate: false });
-      map.setZoom(3);
-      // Allow zoom out 3 levels
-      map.setMinZoom(3 - 3);
+      // calculate initial zoom and allow zoom out 3 levels
+      const initZoom = map.getZoom();
+      map.setMinZoom(initZoom - 3);
       map.setMaxBounds(bounds);
       new L.Control.MiniMap(
         L.imageOverlay('JK-EODMAP.png', bounds),
