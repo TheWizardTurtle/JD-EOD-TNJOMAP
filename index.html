@@ -53,7 +53,7 @@
       const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
       map.fitBounds(bounds, { animate: false });
-      const fullZoom = map.getZoom(); map.setMinZoom(fullZoom - 2); map.setMaxBounds(bounds);
+      const fullZoom = map.getZoom(); map.setMinZoom(fullZoom - 3); map.setMaxBounds(bounds);
       new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds), { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple }, zoomLevelFixed: fullZoom - 2 }).addTo(map);
 
       const prefixMap = { 'Combat Room': '#1f8dd6', 'Meditation Chamber': '#90ee90', 'Lecture Room': '#006400' };
@@ -142,7 +142,12 @@
       pois.forEach(p => {
         if(p.name==='Holocron Vault') return;
         const color = getColor(p.name);
-        const iconHtml = `<div style="width:14px;height:14px;border-radius:50%;background:${color}"></div><div class="radar" style="background:${color}"></div>`;
+        const iconHtml = `
+          <div style="position:relative;width:20px;height:20px;">
+            <div class="radar" style="background:${color}"></div>
+            <div style="position:absolute;top:50%;left:50%;width:14px;height:14px;border-radius:50%;background:${color};transform:translate(-50%,-50%);"></div>
+          </div>
+        `;
         const icon = L.divIcon({ html: iconHtml, iconSize:[20,20], className:'' });
         const marker = L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`);
         let cat='others'; if(p.name.startsWith('Combat Room'))cat='combat'; else if(p.name.startsWith('Meditation Chamber'))cat='meditation'; else if(p.name.startsWith('Lecture Room'))cat='lecture';
