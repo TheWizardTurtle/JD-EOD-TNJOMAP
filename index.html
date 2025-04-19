@@ -63,6 +63,8 @@
       map.setMaxBounds(bounds);
       map.setZoom(map.getMinZoom());
 
+      // MiniMap with independent zoom
+      const miniZoom = map.getMinZoom() - 5;
       new L.Control.MiniMap(
         L.imageOverlay('JK-EODMAP.png', bounds),
         {
@@ -70,7 +72,7 @@
           mapOptions: { crs: L.CRS.Simple, zoomControl: false },
           width: 300,
           height: 300,
-          zoomLevelFixed: map.getMinZoom() - 4
+          zoomLevelFixed: miniZoom
         }
       ).addTo(map);
 
