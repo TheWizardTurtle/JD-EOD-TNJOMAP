@@ -89,10 +89,13 @@
           zoomLevelFixed: miniZoom
         }
       ).addTo(map);
-      // Sync minimap with cursor position
-      map.on('mousemove', function(e) {
-        // center mini map on cursor latlng
+      // Sync only minimap with cursor movement over main map
+      map.on('mousemove', (e) => {
+        // update mini-map center without affecting main map dragging
         miniMapControl._miniMap.setView(e.latlng, miniMapControl._miniMap.getZoom(), { animate: false });
+      });
+      // Sync minimap with cursor position
+      
       });
 
       const hamburger = document.getElementById('hamburger');
