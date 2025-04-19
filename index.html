@@ -14,15 +14,12 @@
     #sidebar { position:absolute; top:0; left:0; width:260px; bottom:0; background:#111; padding:10px; overflow-y:auto; box-shadow:2px 0 8px rgba(0,255,255,0.1); z-index:1000; transition:left .3s ease; }
     #sidebar.collapsed { left:-260px; }
     /* Collapse button positioning */
-    #hamburger { top:10px; } /* left set via rules below */
-    /* When sidebar open, button at edge */
+    #hamburger { top:10px; } /* left set via rules */
     #sidebar:not(.collapsed) ~ #hamburger { left:260px; }
-    /* When collapsed, button at screen edge */
     #sidebar.collapsed ~ #hamburger { left:0; }
     .sidebar-header { margin-bottom:10px; display:flex; align-items:center; }
     #searchBox { flex:1; }
     #searchBox input { width:100%; padding:6px; border:none; border-radius:4px; background:#222; color:#0ff; }
-    #sidebar-buttons { margin-left:8px; display:flex; gap:4px; }
     #sidebar h2 { text-align:center; margin:0 0 10px; font-size:1.4em; font-weight:900; border-bottom:2px solid #0ff; padding-bottom:6px; }
     details { margin-bottom:8px; }
     summary { cursor:pointer; font-weight:700; font-size:1.1em; text-align:center; }
@@ -36,9 +33,6 @@
     #map { position:absolute; top:0; left:0; right:0; bottom:0; z-index:500; }
     @keyframes radar { 0%{transform:scale(1);opacity:0.7;}100%{transform:scale(3);opacity:0;} }
     .radar { position:absolute; width:16px; height:16px; top:50%; left:50%; transform:translate(-50%,-50%); border-radius:50%; animation:radar 3s ease-out infinite; pointer-events:none; z-index:1000; }
-    body.high-contrast { background:#fff; color:#000; }
-    body.high-contrast .control-btn { background:#000; color:#fff; }
-    body.high-contrast #sidebar { background:#eee; color:#000; }
   </style>
 </head>
 <body>
@@ -46,9 +40,6 @@
   <div id="sidebar">
     <div class="sidebar-header">
       <div id="searchBox"><input id="searchInput" placeholder="Search POI..."/></div>
-      <div id="sidebar-buttons">
-        <button id="highContrastToggle" class="control-btn">⚙</button>
-      </div>
     </div>
     <h2>Points of Interest</h2>
     <details id="combatDetail"><summary>Combat Rooms</summary><ul id="combatRooms" class="poi-list"></ul></details>
@@ -58,10 +49,6 @@
     <details id="lectureDetail"><summary>Lecture Rooms</summary><ul id="lectureRooms" class="poi-list"></ul></details>
     <hr class="sidebar-sep"/>
     <ul id="poiList" class="poi-list"></ul>
-    <div style="text-align:center; margin-top:10px;">
-      <button id="resetBtn" class="control-btn">Reset</button>
-      <button id="screenshotBtn" class="control-btn">📷</button>
-    </div>
   </div>
 
   <!-- Collapse button always visible -->
@@ -80,24 +67,15 @@
       const initZoom = map.getZoom(); map.setMinZoom(initZoom - 3); map.setMaxBounds(bounds);
       new L.Control.MiniMap(L.imageOverlay('JK-EODMAP.png', bounds), { toggleDisplay:true, mapOptions:{crs:L.CRS.Simple}, zoomLevelFixed: map.getZoom()-2 }).addTo(map);
 
-      // Controls
+      // Collapse control
       const hamburger = document.getElementById('hamburger');
       const sidebar = document.getElementById('sidebar');
       hamburger.onclick = () => {
         sidebar.classList.toggle('collapsed');
-        if (sidebar.classList.contains('collapsed')) {
-          hamburger.textContent = '▶';
-          hamburger.classList.replace('open','closed');
-        } else {
-          hamburger.textContent = '◀';
-          hamburger.classList.replace('closed','open');
-        }
+        hamburger.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
       };
-      document.getElementById('highContrastToggle').onclick = () => document.body.classList.toggle('high-contrast');
-      document.getElementById('resetBtn').onclick = () => map.flyToBounds(bounds, { animate:true });
-      document.getElementById('screenshotBtn').onclick = () => html2canvas(document.getElementById('map')).then(canvas => { const a=document.createElement('a'); a.href=canvas.toDataURL(); a.download='map.png'; a.click(); });
 
-      // Color logic and POI population here...
+      // POI & color logic omitted for brevity...
     const prefixMap = { 'Combat Room': '#1f8dd6', 'Meditation Chamber': '#90ee90', 'Lecture Room': '#006400' };
       const colorMap = {
         'Sentinel Quarters':'#f1c40f','Trial Room':'#d4a017','Jails':'#e74c3c','Questioning Room':'#e74c3c',
@@ -211,9 +189,6 @@
         document.getElementById(cat+'Detail').addEventListener('toggle', function(){ markersByCategory[cat].forEach(m=> this.open?map.addLayer(m):map.removeLayer(m)); });
       });
     });
-  </script>
-</body>
-</html>
   </script>
 </body>
 </html>
