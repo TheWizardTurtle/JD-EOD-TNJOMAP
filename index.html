@@ -8,13 +8,13 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
   <style>
     html, body { margin:0; padding:0; height:100%; }
-    body { background:#0d0d0d; color:#0ff; font-family:'Segoe UI', sans-serif; }
+    body { background:#0d0d0d; color:#0ff; font-family:'Segoe UI', sans-serif; overflow:hidden; }
     .control-btn { padding:4px 8px; background:#0ff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; box-shadow:0 0 6px rgba(0,255,255,0.4); z-index:1100; }
-    /* Sidebar layout */
-    #sidebar { position:absolute; top:60px; left:0; width:260px; bottom:0; background:#111; padding:10px; overflow-y:auto; box-shadow:2px 0 8px rgba(0,255,255,0.1); z-index:1000; transition:left .3s ease; }
+    /* Sidebar layout full height */
+    #sidebar { position:absolute; top:0; left:0; width:260px; bottom:0; background:#111; padding:10px; overflow-y:auto; box-shadow:2px 0 8px rgba(0,255,255,0.1); z-index:1000; transition:left .3s ease; }
     #sidebar.collapsed { left:-260px; }
-    .sidebar-header { margin-bottom:10px; }
-    #searchBox { width:100%; }
+    .sidebar-header { margin-bottom:10px; display:flex; align-items:center; }
+    #searchBox { flex:1; }
     #searchBox input { width:100%; padding:6px; border:none; border-radius:4px; background:#222; color:#0ff; }
     #sidebar h2 { text-align:center; margin:0 0 10px; font-size:1.4em; font-weight:900; border-bottom:2px solid #0ff; padding-bottom:6px; }
     details { margin-bottom:8px; }
@@ -36,7 +36,7 @@
 </head>
 <body>
   <!-- Persistent Controls -->
-  <button id="hamburger" class="control-btn" style="position:absolute; top:10px; left:10px;">▶</button>
+  <button id="hamburger" class="control-btn" style="position:absolute; top:10px; left:10px;">◀</button>
   <button id="highContrastToggle" class="control-btn" style="position:absolute; top:10px; left:60px;">⚙</button>
   <!-- Sidebar -->
   <div id="sidebar">
@@ -62,6 +62,7 @@
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Initialize map
       const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
       const bounds = [[0,0],[7830,8192]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
