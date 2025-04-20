@@ -183,9 +183,18 @@
           if (currentMarker) map.removeLayer(currentMarker);
           map.addLayer(marker);
           currentMarker = marker;
+          // Temporarily disable maxBounds to avoid snapping when near edge
+          const originalBounds = map.options.maxBounds;
+          map.setMaxBounds(null);
           // Smooth fly and open popup after movement completes
           const targetZoom = Math.min(map.getMaxZoom(), map.getZoom() + 1);
           map.flyTo([poi.y, poi.x], targetZoom, { duration: 1 });
+          map.once('moveend', () => {
+            marker.openPopup();
+            // restore bounds
+            map.setMaxBounds(originalBounds);
+          });
+        }([poi.y, poi.x], targetZoom, { duration: 1 });
           map.once('moveend', () => {
             marker.openPopup();
           });
