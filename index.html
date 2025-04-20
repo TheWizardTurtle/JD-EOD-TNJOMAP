@@ -53,41 +53,45 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      // Map init
-      const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
-      const bounds = [[0,0],[7830,8192]];
-      const pad = 500;
-      const expandedBounds = [[-pad,-pad],[7830+pad,8192+pad]];
-      L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
-      map.fitBounds(bounds, { animate: false });
-      const initZoom = map.getZoom();
-      map.setMinZoom(initZoom-3);
-      map.setMaxBounds(expandedBounds);
-      map.setZoom(initZoom-3);
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialize map
+    const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
+    const bounds = [[0,0],[7830,8192]];
+    const pad = 500;
+    const expandedBounds = [[-pad,-pad],[7830+pad,8192+pad]];
+    L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
+    map.fitBounds(bounds, { animate: false });
+    const initZoom = map.getZoom();
+    map.setMinZoom(initZoom - 3);
+    map.setMaxBounds(expandedBounds);
+    map.setZoom(initZoom - 3);
 
-      // MiniMap
-      const miniControl = new L.Control.MiniMap(
-        L.imageOverlay('JK-EODMAP.png', bounds),
-        { toggleDisplay:true, mapOptions:{ crs:L.CRS.Simple, zoomControl:false }, width:300, height:300, zoomLevelOffset:-4 }
-      ).addTo(map);
+    // Minimap setup
+    const miniControl = new L.Control.MiniMap(
+      L.imageOverlay('JK-EODMAP.png', bounds),
+      { toggleDisplay: true, mapOptions: { crs: L.CRS.Simple, zoomControl: false }, width: 300, height: 300, zoomLevelOffset: -4 }
+    ).addTo(map);
 
-      // Sidebar toggle
-      const sidebar = document.getElementById('sidebar'), btn = document.getElementById('hamburger');
-      btn.onclick = () => { sidebar.classList.toggle('collapsed'); btn.textContent = sidebar.classList.contains('collapsed')?'▶':'◀'; };
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    const btn = document.getElementById('hamburger');
+    btn.onclick = () => {
+      sidebar.classList.toggle('collapsed');
+      btn.textContent = sidebar.classList.contains('collapsed') ? '▶' : '◀';
+    };
 
-      // Colors
-      const prefixMap = { 'Combat Room':'#1f8dd6','Meditation Chamber':'#90ee90','Lecture Room':'#006400' };
-      const colorMap = {
-        'Sentinel Quarters':'#f1c40f','Trial Room':'#d4a017','Jails':'#e74c3c','Questioning Room':'#e74c3c',
-        'JAF Dojo':'#5dade2','Cantina':'#0ff','Main TG Dojo':'#f1c40f','TG Dojo #2':'#f1c40f','Archives':'#39ff14',
-        'Combat Hall':'#1f75fe','Lecture Hall':'#adff2f','Consular Quarters':'#2ecc71','Spawn':'#800000',
-        'Council Room':'#ffd700','Hangar Teleport':'#888888','VIP Statues':'#d4af37','Saber Forge':'#ffffff'
-      };
-      const getColor = name => colorMap[name] || Object.entries(prefixMap).find(([k])=>name.startsWith(k))?.[1] || '#0ff';
+    // Color definitions
+    const prefixMap = { 'Combat Room': '#1f8dd6', 'Meditation Chamber': '#90ee90', 'Lecture Room': '#006400' };
+    const colorMap = {
+      'Sentinel Quarters':'#f1c40f','Trial Room':'#d4a017','Jails':'#e74c3c','Questioning Room':'#e74c3c',
+      'JAF Dojo':'#5dade2','Cantina':'#0ff','Main TG Dojo':'#f1c40f','TG Dojo #2':'#f1c40f','Archives':'#39ff14',
+      'Combat Hall':'#1f75fe','Lecture Hall':'#adff2f','Consular Quarters':'#2ecc71','Spawn':'#800000',
+      'Council Room':'#ffd700','Hangar Teleport':'#888888','VIP Statues':'#d4af37','Saber Forge':'#ffffff'
+    };
+    const getColor = name => colorMap[name] || Object.entries(prefixMap).find(([k]) => name.startsWith(k))?.[1] || '#0ff';
 
-      // POIs
-      const pois = [
+    // Full POI array
+    const pois = [
         { name: 'Sentinel Quarters', x:3032,y:6784 },{ name: 'Trial Room', x:304,y:6304 },{ name: 'Jails', x:1176,y:4448 },
         { name:'Questioning Room',x:2056,y:5164},{ name:'JAF Dojo',x:2768,y:5564},{ name:'Cantina',x:4484,y:5832 },
         { name:'Main TG Dojo',x:6160,y:5380},{ name:'Archives',x:6996,y:4376},{ name:'Combat Hall',x:4372,y:4360 },
@@ -116,95 +120,104 @@
         { name:'Lecture Room 10',x:3352,y:6793 }
       ];
 
-      const containers = {
-        combat: document.getElementById('combatRooms'), meditation: document.getElementById('meditationChambers'),
-        lecture: document.getElementById('lectureRooms'), others: document.getElementById('poiList')
-      };
-      Object.values(containers).forEach(c=>c.innerHTML='');
-      const markers=[]; let currentMarker=null;
 
-      pois.forEach(poi=>{
-        const col=getColor(poi.name);
-        const icon=L.divIcon({ html:`<div style="width:14px;height:14px;border-radius:50%;background:${col};box-shadow:0 0 6px ${col};"></div>`, iconSize:[14,14], iconAnchor:[7,7], className:'' });
-        const marker=L.marker([poi.y,poi.x],{icon}).bindPopup(`<strong>${poi.name}</strong>`,{autoPan:false});
-        marker.poiName=poi.name.toLowerCase(); markers.push(marker);
-        const li=document.createElement('li'); li.textContent=poi.name; li.style.color=col;
-        li.onclick = () => {
-          if (currentMarker === marker) {
-            map.removeLayer(marker);
-            const elRemove = marker.getElement();
-            if (elRemove) {
-              const radarEl = elRemove.querySelector('.radar');
-              if (radarEl) elRemove.removeChild(radarEl);
-            }
-            currentMarker = null;
-            return;
-          }
-          if (currentMarker) {
-            map.removeLayer(currentMarker);
-            const oldEl = currentMarker.getElement();
-            if (oldEl) {
-              const oldRadar = oldEl.querySelector('.radar');
-              if (oldRadar) oldEl.removeChild(oldRadar);
-            }
-          }
-          map.addLayer(marker);
-          currentMarker = marker;
-          map.once('moveend', () => marker.openPopup());
-          map.flyTo([poi.y, poi.x], Math.min(map.getMaxZoom(), map.getZoom() + 1), { duration: 1 });
+    // Containers
+    const containers = {
+      combat: document.getElementById('combatRooms'),
+      meditation: document.getElementById('meditationChambers'),
+      lecture: document.getElementById('lectureRooms'),
+      others: document.getElementById('poiList')
+    };
+    Object.values(containers).forEach(c => c.innerHTML = '');
+    const markers = [];
+    let currentMarker = null;
+
+    // Create markers and sidebar items
+    pois.forEach(poi => {
+      if (poi.name === 'Holocron Vault') return;
+      const col = getColor(poi.name);
+      const icon = L.divIcon({
+        html: `<div style="width:14px;height:14px;border-radius:50%;background:${col};box-shadow:0 0 6px ${col};"></div>`,
+        iconSize: [14,14], iconAnchor: [7,7], className: ''
+      });
+      const marker = L.marker([poi.y, poi.x], { icon }).bindPopup(`<strong>${poi.name}</strong>`, { autoPan: false });
+      marker.poiName = poi.name.toLowerCase();
+      markers.push(marker);
+
+      const li = document.createElement('li');
+      li.textContent = poi.name;
+      li.style.color = col;
+      li.onclick = () => {
+        if (currentMarker === marker) {
+          map.removeLayer(marker);
           const el = marker.getElement();
-          if (el && !el.querySelector('.radar')) {
-            const radarEl = document.createElement('div');
-            radarEl.className = 'radar';
-            radarEl.style.background = col;
-            el.appendChild(radarEl);
-          }
-        };
-        if(poi.name.startsWith('Combat Room')) containers.combat.appendChild(li);
-        else if(poi.name.startsWith('Meditation Chamber')) containers.meditation.appendChild(li);
-        else if(poi.name.startsWith('Lecture Room')) containers.lecture.appendChild(li);
-        else containers.others.appendChild(li);
-      });
+          el?.querySelectorAll('.radar').forEach(r => r.remove());
+          currentMarker = null;
+          return;
+        }
+        if (currentMarker) {
+          map.removeLayer(currentMarker);
+          const oldEl = currentMarker.getElement();
+          oldEl?.querySelectorAll('.radar').forEach(r => r.remove());
+        }
+        map.addLayer(marker);
+        currentMarker = marker;
+        map.flyTo([poi.y, poi.x], Math.min(map.getMaxZoom(), map.getZoom() + 1), { duration: 1 });
+        map.once('moveend', () => marker.openPopup());
+        const el = marker.getElement();
+        if (el) {
+          const radar = document.createElement('div'); radar.className = 'radar'; radar.style.background = col;
+          el.appendChild(radar);
+        }
+      };
 
-      document.getElementById('searchInput').addEventListener('input',e=>{
-        const term=e.target.value.toLowerCase();
-        if(currentMarker){ map.removeLayer(currentMarker); currentMarker=null; }
-        markers.forEach(m=>map.removeLayer(m));
-        if(!term)return; const found=markers.find(m=>m.poiName.includes(term));
-        if(found){ map.addLayer(found); currentMarker=found;
-          const el=found.getElement(); if(el){ const ping=document.createElement('div'); ping.className='radar'; ping.style.background=getColor(found.getPopup().getContent().replace(/<.*?>/g,'')); el.appendChild(ping); setTimeout(()=>el.removeChild(ping),1000);} }
-      });
+      if (poi.name.startsWith('Combat Room')) containers.combat.appendChild(li);
+      else if (poi.name.startsWith('Meditation Chamber')) containers.meditation.appendChild(li);
+      else if (poi.name.startsWith('Lecture Room')) containers.lecture.appendChild(li);
+      else containers.others.appendChild(li);
+    });
 
-      ['combat','meditation','lecture'].forEach(cat=>{
-        document.getElementById(cat+'Detail').addEventListener('toggle', function() {
-          markers.forEach(m => {
-            if (m.poiName.startsWith(cat)) {
-              const el = m.getElement();
-              if (this.open) {
-                map.addLayer(m);
-                // add radar pulse
-                if (el && !el.querySelector('.radar')) {
-                  const col = getColor(m.getPopup().getContent().replace(/<.*?>/g, ''));
-                  const radarEl = document.createElement('div');
-                  radarEl.className = 'radar';
-                  radarEl.style.background = col;
-                  el.appendChild(radarEl);
-                }
-              } else {
-                map.removeLayer(m);
-                // remove radar pulse
-                if (el) {
-                  const radarEl = el.querySelector('.radar');
-                  if (radarEl) el.removeChild(radarEl);
-                }
+    // Search functionality
+    document.getElementById('searchInput').addEventListener('input', e => {
+      const term = e.target.value.toLowerCase();
+      if (currentMarker) { map.removeLayer(currentMarker); currentMarker = null; }
+      markers.forEach(m => map.removeLayer(m));
+      if (!term) return;
+      const found = markers.find(m => m.poiName.includes(term));
+      if (found) {
+        map.addLayer(found);
+        currentMarker = found;
+        const el = found.getElement();
+        if (el) {
+          const ping = document.createElement('div'); ping.className ='radar'; ping.style.background = getColor(found.getPopup().getContent().replace(/<.*?>/g, ''));
+          el.appendChild(ping);
+          setTimeout(() => el.removeChild(ping), 1000);
+        }
+      }
+    });
+
+    // Category toggles with radar
+    ['combat','meditation','lecture'].forEach(cat => {
+      document.getElementById(cat + 'Detail').addEventListener('toggle', function() {
+        markers.forEach(m => {
+          if (m.poiName.startsWith(cat)) {
+            const el = m.getElement();
+            if (this.open) {
+              map.addLayer(m);
+              if (el && !el.querySelector('.radar')) {
+                const col = getColor(m.getPopup().getContent().replace(/<.*?>/g, ''));
+                const radar = document.createElement('div'); radar.className = 'radar'; radar.style.background = col;
+                el.appendChild(radar);
               }
+            } else {
+              map.removeLayer(m);
+              el?.querySelectorAll('.radar').forEach(r => r.remove());
             }
-          });
-        });
-      });
+          }
         });
       });
     });
-  </script>
+  });
+</script>
 </body>
 </html>
