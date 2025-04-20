@@ -175,10 +175,20 @@
         li.textContent = poi.name;
         li.style.color = col;
         li.onclick = () => {
-          if (currentMarker === marker) { map.removeLayer(marker); currentMarker = null; return; }
+          if (currentMarker === marker) {
+            map.removeLayer(marker);
+            currentMarker = null;
+            return;
+          }
           if (currentMarker) map.removeLayer(currentMarker);
-          map.flyTo([poi.y, poi.x], map.getZoom() + 1, { duration: 1 });
-          map.addLayer(marker); currentMarker = marker; marker.openPopup();
+          map.addLayer(marker);
+          currentMarker = marker;
+          // Smooth fly and open popup after movement completes
+          const targetZoom = Math.min(map.getMaxZoom(), map.getZoom() + 1);
+          map.flyTo([poi.y, poi.x], targetZoom, { duration: 1 });
+          map.once('moveend', () => {
+            marker.openPopup();
+          });
         };
 
         if (poi.name.startsWith('Combat Room')) containers.combat.appendChild(li);
