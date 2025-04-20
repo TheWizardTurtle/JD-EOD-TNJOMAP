@@ -57,11 +57,14 @@
     document.addEventListener('DOMContentLoaded', () => {
       const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
       const bounds = [[0,0],[7830,8192]];
+      // expand bounds to prevent snapping at edges
+      const pad = 500;
+      const expandedBounds = [[-pad, -pad], [7830 + pad, 8192 + pad]];
       L.imageOverlay('JK-EODMAP.png', bounds).addTo(map);
       map.fitBounds(bounds, { animate: false });
       const initZoom = map.getZoom();
       map.setMinZoom(initZoom - 3);
-      map.setMaxBounds(bounds);
+      map.setMaxBounds(expandedBounds);
       map.setZoom(initZoom - 3);
 
       const miniControl = new L.Control.MiniMap(
