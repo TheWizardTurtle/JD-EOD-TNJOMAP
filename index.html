@@ -4,20 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jedi Temple Interactive Map</title>
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- MiniMap CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.css" />
+  <!-- Draw CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet-draw/dist/leaflet.draw.css" />
   <style>
     html, body { margin:0; padding:0; height:100%; overflow:hidden; }
     body { background:#0d0d0d; color:#0ff; font-family:'Segoe UI',sans-serif; }
     .control-btn { position:absolute; padding:4px 8px; background:#0ff; border:none; border-radius:4px; cursor:pointer; font-weight:bold; z-index:1101; }
     #sidebar { position:absolute; top:0; left:0; width:260px; bottom:0; background:#111; padding:10px; overflow-y:auto; transition:left .3s ease; z-index:1000; }
     #sidebar.collapsed { left:-260px; }
-    #hamburger { position:absolute; top:10px; z-index:1102; }
+    #hamburger, #permalinkBtn { position:absolute; top:10px; z-index:1102; }
+    #hamburger { left:260px; }
     #sidebar.collapsed ~ #hamburger { left:0; }
-    #sidebar:not(.collapsed) ~ #hamburger { left:260px; }
-    .sidebar-header { display:flex; margin-bottom:10px; }
-    #searchBox { flex:1; }
-    #searchBox input { width:100%; padding:6px; border:none; border-radius:4px; background:#222; color:#0ff; }
+    #permalinkBtn { left:320px; }
+    #sidebar.collapsed ~ #permalinkBtn { left:60px; }
     #sidebar h2 { text-align:center; margin:0 0 10px; font-size:1.4em; font-weight:900; border-bottom:2px solid #0ff; padding-bottom:6px; }
     details { margin-bottom:8px; }
     summary { cursor:pointer; font-weight:700; font-size:1.1em; text-align:center; }
@@ -29,16 +32,19 @@
     ul.poi-list li { padding:6px; margin:4px 0; text-align:center; cursor:pointer; font-weight:600; }
     .sidebar-sep { border-top:1px solid #555; margin:6px 0; }
     #map { position:absolute; top:0; left:0; right:0; bottom:0; background:rgba(80,67,67,1); z-index:500; }
+    @media(max-width:768px) {
+      #sidebar { left:-260px; }
+      #hamburger { left:0; }
+      #permalinkBtn { left:60px; }
+    }
     @keyframes radar { 0%{transform:scale(1);opacity:0.7;}100%{transform:scale(3);opacity:0;} }
     .radar { position:absolute; width:24px; height:24px; top:50%; left:50%; transform:translate(-50%,-50%); border-radius:50%; animation:radar 3s ease-out infinite; pointer-events:none; z-index:1000; }
   </style>
 </head>
 <body>
   <div id="sidebar">
-    <div class="sidebar-header">
-      <div id="searchBox"><input id="searchInput" placeholder="Search POI..."/></div>
-    </div>
     <h2>Points of Interest</h2>
+    <div id="searchBox"><input id="searchInput" placeholder="Search POI..." style="width:100%;padding:6px;border:none;border-radius:4px;background:#222;color:#0ff;"/></div>
     <details id="combatDetail"><summary>Combat Rooms</summary><ul id="combatRooms" class="poi-list"></ul></details>
     <hr class="sidebar-sep"/>
     <details id="meditationDetail"><summary>Meditation Chambers</summary><ul id="meditationChambers" class="poi-list"></ul></details>
@@ -48,12 +54,19 @@
     <ul id="poiList" class="poi-list"></ul>
   </div>
   <button id="hamburger" class="control-btn">◀</button>
+  <button id="permalinkBtn" class="control-btn">Permalink</button>
   <div id="map"></div>
 
+  <!-- Leaflet & Plugins -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet-minimap/dist/Control.MiniMap.min.js"></script>
+  <script src="https://unpkg.com/leaflet-draw/dist/leaflet.draw.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Responsive sidebar collapse on load
+      const sidebar = document.getElementById('sidebar');
+      if (window.innerWidth < 768) sidebar.classList.add('collapsed');
+
       // Map init
       const map = L.map('map', { crs: L.CRS.Simple, zoomControl: true });
       const bounds = [[0,0],[7830,8192]];
@@ -66,14 +79,29 @@
       map.setMaxBounds(expandedBounds);
       map.setZoom(initZoom - 3);
 
+      // Performance: marker cluster
+      const markerCluster = L.markerClusterGroup();
+
       // Minimap
       new L.Control.MiniMap(
         L.imageOverlay('JK-EODMAP.png', bounds),
         { toggleDisplay:true, mapOptions:{ crs:L.CRS.Simple, zoomControl:false }, width:300, height:300, zoomLevelOffset:-4 }
       ).addTo(map);
 
+      // Draw control
+      const drawGroup = new L.FeatureGroup().addTo(map);
+      const drawControl = new L.Control.Draw({ edit: { featureGroup: drawGroup } });
+      map.addControl(drawControl);
+      map.on(L.Draw.Event.CREATED, e => drawGroup.addLayer(e.layer));
+
+      // Permalink
+      document.getElementById('permalinkBtn').onclick = () => {
+        const hash = window.location.hash;
+        navigator.clipboard.writeText(window.location.origin + window.location.pathname + hash);
+        alert('Link copied to clipboard');
+      };
+
       // Sidebar toggle
-      const sidebar = document.getElementById('sidebar');
       const btn = document.getElementById('hamburger');
       btn.onclick = () => {
         sidebar.classList.toggle('collapsed');
@@ -82,12 +110,7 @@
 
       // Color defs
       const prefixMap = { 'Combat Room':'#1f8dd6','Meditation Chamber':'#90ee90','Lecture Room':'#006400' };
-      const colorMap = {
-        'Sentinel Quarters':'#f1c40f','Trial Room':'#d4a017','Jails':'#e74c3c','Questioning Room':'#e74c3c',
-        'JAF Dojo':'#5dade2','Cantina':'#0ff','Main TG Dojo':'#f1c40f','TG Dojo #2':'#f1c40f','Archives':'#39ff14',
-        'Combat Hall':'#1f75fe','Lecture Hall':'#adff2f','Consular Quarters':'#2ecc71','Spawn':'#800000',
-        'Council Room':'#ffd700','Hangar Teleport':'#888888','VIP Statues':'#d4af37','Saber Forge':'#ffffff'
-      };
+      const colorMap = { 'Sentinel Quarters':'#f1c40f','Trial Room':'#d4a017','Jails':'#e74c3c','Questioning Room':'#e74c3c','JAF Dojo':'#5dade2','Cantina':'#0ff','Main TG Dojo':'#f1c40f','TG Dojo #2':'#f1c40f','Archives':'#39ff14','Combat Hall':'#1f75fe','Lecture Hall':'#adff2f','Consular Quarters':'#2ecc71','Spawn':'#800000','Council Room':'#ffd700','Hangar Teleport':'#888888','VIP Statues':'#d4af37','Saber Forge':'#ffffff' };
       const getColor = name => colorMap[name] || Object.entries(prefixMap).find(([k])=>name.startsWith(k))?.[1] || '#0ff';
 
       // POIs
@@ -122,54 +145,67 @@
 
       const containers = { combat:document.getElementById('combatRooms'), meditation:document.getElementById('meditationChambers'), lecture:document.getElementById('lectureRooms'), others:document.getElementById('poiList') };
       Object.values(containers).forEach(c=>c.innerHTML='');
-      const markers=[]; let current=null;
+      const markers = [];
+      let current = null;
 
       // Create markers & list
-      pois.forEach(p=>{
-        if(p.name==='Holocron Vault')return;
-        const col=getColor(p.name);
-        const icon=L.divIcon({
-          html: ` <div style="width:14px; height:14px; border-radius:50%; background:${col}; box-shadow:0 0 6px ${col};"></div> `,
-          iconSize:[14,14],
-          iconAnchor:[7,7],
-          className: ''
+      pois.forEach(p => {
+        if (p.name === 'Holocron Vault') return;
+        const col = getColor(p.name);
+        const icon = L.divIcon({ html: `<div style="width:14px;height:14px;border-radius:50%;background:${col};box-shadow:0 0 6px ${col};"></div>`, iconSize:[14,14], iconAnchor:[7,7], className:'' });
+        const m = L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`,{autoPan:false});
+        m.poiName = p.name.toLowerCase(); markers.push(m);
+        markerCluster.addLayer(m);
+
+        const li = document.createElement('li'); li.textContent = p.name; li.style.color = col;
+        li.addEventListener('click', () => {
+          if (current === m) { map.removeLayer(m); current = null; return; }
+          if (current) map.removeLayer(current);
+          map.addLayer(m); current = m;
+          map.flyTo([p.y,p.x], Math.min(map.getMaxZoom(), map.getZoom()+1), { duration:1 });
+          map.once('moveend', () => m.openPopup());
+          const el = m.getElement(); if (el && !el.querySelector('.radar')) { const r = document.createElement('div'); r.className='radar'; r.style.background=col; el.appendChild(r); }
         });
-        const m=L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`,{autoPan:false}); m.poiName=p.name.toLowerCase(); markers.push(m);
-        const li=document.createElement('li'); li.textContent=p.name; li.style.color=col;
-        li.onclick=()=>{
-          if(current===m){ map.removeLayer(m); m.getElement()?.querySelectorAll('.radar').forEach(r=>r.remove()); current=null; return; }
-          if(current){ map.removeLayer(current); current.getElement()?.querySelectorAll('.radar').forEach(r=>r.remove()); }
-          map.addLayer(m); current=m;
-          map.flyTo([p.y,p.x],Math.min(map.getMaxZoom(),map.getZoom()+1),{duration:1});
-          map.once('moveend',()=>m.openPopup());
-          const el=m.getElement(); if(el) { const r=document.createElement('div'); r.className='radar'; r.style.background=col; el.appendChild(r); }
-        };
-        if(p.name.startsWith('Combat Room')) containers.combat.appendChild(li);
-        else if(p.name.startsWith('Meditation Chamber')) containers.meditation.appendChild(li);
-        else if(p.name.startsWith('Lecture Room')) containers.lecture.appendChild(li);
+        if (p.name.startsWith('Combat Room')) containers.combat.appendChild(li);
+        else if (p.name.startsWith('Meditation Chamber')) containers.meditation.appendChild(li);
+        else if (p.name.startsWith('Lecture Room')) containers.lecture.appendChild(li);
         else containers.others.appendChild(li);
       });
 
+      map.addLayer(markerCluster);
+
       // Search
-      document.getElementById('searchInput').addEventListener('input',e=>{
-        const term=e.target.value.toLowerCase(); if(current){ map.removeLayer(current); current.getElement()?.querySelectorAll('.radar').forEach(r=>r.remove()); current=null; }
-        markers.forEach(m=>map.removeLayer(m)); if(!term)return;
-        const f=markers.find(m=>m.poiName.includes(term)); if(f){ map.addLayer(f); current=f; const el=f.getElement(); if(el){ const r=document.createElement('div'); r.className='radar'; r.style.background=getColor(f.getPopup().getContent().replace(/<.*?>/g,'')); el.appendChild(r); setTimeout(()=>r.remove(),1000);} }
-      });
+      document.getElementById('searchInput').addEventListener('input', debounce(e=>{
+        const term = e.target.value.toLowerCase();
+        if (current) { map.removeLayer(current); current=null; }
+        markerCluster.clearLayers();
+        markers.forEach(m=> markerCluster.addLayer(m));
+        if (!term) return;
+        markers.forEach(m=>map.removeLayer(m));
+        const f = markers.find(m=>m.poiName.includes(term));
+        if (f) { map.addLayer(f); current=f; const el = f.getElement(); if(el){ const r=document.createElement('div');r.className='radar';r.style.background=getColor(f.getPopup().getContent().replace(/<.*?>/g,''));el.appendChild(r); setTimeout(()=>r.remove(),1000);} }
+      }),200));
 
       // Category toggles
       ['combat','meditation','lecture'].forEach(cat=>{
-        document.getElementById(cat+'Detail').addEventListener('toggle',function(){
+        document.getElementById(cat+'Detail').addEventListener('toggle', function() {
           markers.forEach(m=>{
-            if(m.poiName.startsWith(cat)){
-              const el=m.getElement();
-              if(this.open){ map.addLayer(m); setTimeout(()=>{ if(el&&!el.querySelector('.radar')){ const col=getColor(m.getPopup().getContent().replace(/<.*?>/g,'')); const r=document.createElement('div'); r.className='radar'; r.style.background=col; el.appendChild(r);} },100);
-              } else { map.removeLayer(m); el?.querySelectorAll('.radar').forEach(r=>r.remove()); }
+            if (m.poiName.startsWith(cat)) {
+              const el = m.getElement();
+              if (this.open) {
+                map.addLayer(m);
+                setTimeout(() => { if(el&&!el.querySelector('.radar')){ const col=getColor(m.getPopup().getContent().replace(/<.*?>/g,'')); const r=document.createElement('div');r.className='radar';r.style.background=col;el.appendChild(r);} },100);
+              } else {
+                map.removeLayer(m); el?.querySelectorAll('.radar').forEach(r=>r.remove());
+              }
             }
           });
         });
       });
     });
+
+    // Debounce helper
+    function debounce(fn,delay=200){ let t; return(...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),delay); }; }
   </script>
 </body>
 </html>
