@@ -129,9 +129,9 @@
         if(p.name==='Holocron Vault')return;
         const col=getColor(p.name);
         const icon=L.divIcon({
-          html: '<div style="width:14px;height:14px;border-radius:50%;background:' + col + ';box-shadow:0 0 6px ' + col + ';"></div>',
-          iconSize: [14,14],
-          iconAnchor: [7,7],
+          html: ` <div style="width:14px; height:14px; border-radius:50%; background:${col}; box-shadow:0 0 6px ${col};"></div> `,
+          iconSize:[14,14],
+          iconAnchor:[7,7],
           className: ''
         });
         const m=L.marker([p.y,p.x],{icon}).bindPopup(`<strong>${p.name}</strong>`,{autoPan:false}); m.poiName=p.name.toLowerCase(); markers.push(m);
