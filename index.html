@@ -176,8 +176,32 @@
       });
 
       ['combat','meditation','lecture'].forEach(cat=>{
-        document.getElementById(cat+'Detail').addEventListener('toggle',function(){
-          markers.forEach(m=>{ if(m.poiName.startsWith(cat)) this.open?map.addLayer(m):map.removeLayer(m); });
+        document.getElementById(cat+'Detail').addEventListener('toggle', function() {
+          markers.forEach(m => {
+            if (m.poiName.startsWith(cat)) {
+              const el = m.getElement();
+              if (this.open) {
+                map.addLayer(m);
+                // add radar pulse
+                if (el && !el.querySelector('.radar')) {
+                  const col = getColor(m.getPopup().getContent().replace(/<.*?>/g, ''));
+                  const radarEl = document.createElement('div');
+                  radarEl.className = 'radar';
+                  radarEl.style.background = col;
+                  el.appendChild(radarEl);
+                }
+              } else {
+                map.removeLayer(m);
+                // remove radar pulse
+                if (el) {
+                  const radarEl = el.querySelector('.radar');
+                  if (radarEl) el.removeChild(radarEl);
+                }
+              }
+            }
+          });
+        });
+      });
         });
       });
     });
