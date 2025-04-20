@@ -201,20 +201,26 @@
       document.getElementById(cat + 'Detail').addEventListener('toggle', function() {
         markers.forEach(m => {
           if (m.poiName.startsWith(cat)) {
-            const el = m.getElement();
             if (this.open) {
               map.addLayer(m);
-              if (el && !el.querySelector('.radar')) {
-                const col = getColor(m.getPopup().getContent().replace(/<.*?>/g, ''));
-                const radar = document.createElement('div'); radar.className = 'radar'; radar.style.background = col;
-                el.appendChild(radar);
-              }
+              // delay to ensure marker element is in DOM
+              setTimeout(() => {
+                const el = m.getElement();
+                if (el && !el.querySelector('.radar')) {
+                  const col = getColor(m.getPopup().getContent().replace(/<.*?>/g, ''));
+                  const radar = document.createElement('div'); radar.className = 'radar'; radar.style.background = col;
+                  el.appendChild(radar);
+                }
+              }, 100);
             } else {
               map.removeLayer(m);
+              const el = m.getElement();
               el?.querySelectorAll('.radar').forEach(r => r.remove());
             }
           }
         });
+      });
+    });
       });
     });
   });
